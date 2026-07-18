@@ -1,2 +1,3 @@
-# PalmHealth
-Una pagina web orientada al sector salud que permite gestionar a los pacientes de manera autonoma y darles seguimiento adecuado
+# Palm Health — Frontend
+
+Initial setup for the Palm Health single-page application frontend.

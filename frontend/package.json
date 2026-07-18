@@ -1,0 +1,21 @@
+{
+  "name": "palm-health",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Palm Health - Remote clinical monitoring platform. Monorepo root orchestrating the frontend (Vanilla JS SPA) and backend (Express.js MVC) workspaces.",
+  "scripts": {
+    "db:start": "bash scripts/start-postgres.sh",
+    "dev": "bash scripts/start-postgres.sh && concurrently -n backend,css -c blue,green \"pnpm --filter palm-health-backend dev\" \"pnpm --filter palm-health-frontend watch:css\"",
+    "start": "pnpm --filter palm-health-backend start",
+    "build:css": "pnpm --filter palm-health-frontend build:css"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "mammoth": "^1.12.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "bcrypt"
+    ]
+  }
+}
