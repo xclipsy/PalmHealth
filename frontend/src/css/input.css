@@ -1,0 +1,40 @@
+/**
+ * Tailwind CSS v4 entry point.
+ * Design tokens derive from the Palm Health logo palette:
+ * mint green, soft aqua/medical blue and warm neutrals.
+ * Compiled to styles.css via the Tailwind CLI (see package.json scripts).
+ */
+
+@import "tailwindcss";
+
+/* Scan SPA source files for utility classes */
+@source "../../index.html";
+@source "../js/**/*.js";
+
+@theme {
+  /* Typography */
+  --font-sans: "Poppins", ui-sans-serif, system-ui, sans-serif;
+
+  /* Core palette (3-5 colors): primary mint, medical blue accent, warm neutrals */
+  --color-background: #fbfaf7;   /* warm off-white from the logo background */
+  --color-foreground: #2f3e3b;   /* deep green-gray for text */
+  --color-primary: #7fc8b4;      /* mint green (brand) */
+  --color-primary-dark: #5aa892; /* mint green hover/active */
+  --color-accent: #8fb8d8;       /* soft medical blue */
+  --color-muted: #8a948f;        /* muted gray-green for secondary text */
+  --color-surface: #ffffff;      /* card surfaces */
+
+  /* Semantic feedback (soft, health-friendly tones) */
+  --color-success: #6fbf8f;
+  --color-warning: #e8c07d;
+  --color-error: #d98b8b;
+
+  /* Corner rounding baseline */
+  --radius: 1rem;
+}
+
+/* Accessible focus outline for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
