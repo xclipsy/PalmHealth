@@ -1,9 +1,9 @@
 /**
- * Patient controller — thin HTTP layer for /api/patient/*.
+ * Controlador de pacientes — capa HTTP para /api/patient/*.
  *
- * Every handler: reads validated input, delegates to the patient
- * service and responds through sendSuccess. No business logic and
- * no SQL live here (Part 6 architecture rules).
+ * Los handlers reciben datos validados, delegan en el servicio
+ * de pacientes y responden con sendSuccess. Sin lógica de negocio
+ * ni SQL (reglas de arquitectura Parte 6).
  */
 
 const patientService = require('../services/patient.service');
