@@ -1,6 +1,7 @@
 /**
- * Patient module validators — every /api/patient/* write and every
- * filtered list runs one of these chains before its controller.
+ * Validadores del módulo de pacientes: cada operación de escritura en
+ * /api/patient/* y cada listado con filtros ejecuta una de estas cadenas
+ * antes de llegar al controlador.
  */
 
 const { body, query } = require('express-validator');
@@ -82,8 +83,10 @@ const listSymptomsValidator = [
 ];
 
 /**
- * Marks a chain as required (with a Spanish message) on create, or
- * optional on update. Keeps subsequent validators intact.
+ * Marca una cadena como obligatoria (con mensaje en español) al crear,
+ * o como opcional al actualizar. Mantiene los validadores posteriores
+ * intactos.
+ *
  * @param {import('express-validator').ValidationChain} chain
  * @param {boolean} isCreate
  * @param {string} requiredMessage
