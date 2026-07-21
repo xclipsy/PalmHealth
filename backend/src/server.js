@@ -1,10 +1,12 @@
 /**
- * Server entry point.
+ * Punto de entrada del servidor.
  *
- * Responsibility: bootstrap only. It loads environment configuration,
- * imports the configured Express application and starts listening.
- * All Express configuration lives in app.js (separation of concerns:
- * app.js is importable by tests without opening a network port).
+ * Responsabilidad: solo inicialización. Carga la configuración del
+ * entorno, importa la aplicación Express configurada e inicia la escucha.
+ *
+ * Toda la configuración de Express vive en app.js (separación de
+ * responsabilidades: app.js puede ser importado por pruebas sin abrir
+ * un puerto de red).
  */
 
 const app = require('./app');
@@ -17,10 +19,12 @@ const server = app.listen(env.port, () => {
 });
 
 /**
- * Graceful shutdown: close the HTTP server and the PostgreSQL pool on
- * termination signals so in-flight requests finish and no database
- * connections leak before the process exits.
- * @param {string} signal - The received process signal name.
+ * Apagado controlado: cierra el servidor HTTP y el pool de PostgreSQL
+ * al recibir señales de terminación, permitiendo que las solicitudes
+ * en curso finalicen y evitando fugas de conexiones a la base de datos
+ * antes de que el proceso termine.
+ *
+ * @param {string} signal - Nombre de la señal del proceso recibida.
  */
 const shutdown = (signal) => {
   // eslint-disable-next-line no-console
