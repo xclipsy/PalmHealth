@@ -1,10 +1,9 @@
 /**
- * Health controller.
+ * Controlador de salud.
  *
- * Reference implementation of the controller layer: thin, no business
- * logic, wrapped in asyncHandler and responding only through the
- * standardized response helpers. Every future controller follows this
- * exact shape.
+ * Implementación de referencia de la capa de controladores:
+ * ligera, sin lógica de negocio y usando respuestas estandarizadas.
+ * Define la estructura para futuros controladores.
  */
 
 const { asyncHandler } = require('../utils/async-handler.util');
@@ -13,7 +12,8 @@ const { isDatabaseHealthy } = require('../config/database.config');
 
 /**
  * GET /api/health
- * Reports API liveness and database connectivity.
+ *
+ * Reporta el estado de la API y la conexión con la base de datos.
  */
 const getHealth = asyncHandler(async (req, res) => {
   const databaseUp = await isDatabaseHealthy();
