@@ -1,9 +1,9 @@
 /**
- * JWT helpers (Part 3 of the specification).
+ * Helpers para JWT (Parte 3 de la especificación).
  *
- * Tokens are stateless: the payload carries only { id, role } — never
- * email, names or any sensitive data. Secret and expiration come
- * exclusively from environment configuration.
+ * Los tokens son stateless: el payload solo contiene { id, role }, nunca
+ * correo, nombres ni datos sensibles. El secreto y la expiración provienen
+ * exclusivamente de las variables de entorno.
  */
 
 const jwt = require('jsonwebtoken');
@@ -11,13 +11,13 @@ const { env } = require('../config/env.config');
 const { AuthenticationError } = require('../errors/app.errors');
 
 /**
- * Signs an access token for an authenticated user.
- * @param {{ id: number, role: string }} payload - Minimal identity claims.
- * @returns {string} Signed JWT valid for env.jwtExpiresIn (default 24h).
+ * Firma un token de acceso para un usuario autenticado.
+ * @param {{ id: number, role: string }} payload - Claims mínimos de identidad.
+ * @returns {string} JWT firmado válido según env.jwtExpiresIn (por defecto 24h).
  */
 const signToken = (payload) => {
   if (!env.jwtSecret) {
-    // Fail fast on misconfiguration instead of signing weak tokens.
+    // Falla rápidamente ante configuraciones incorrectas en lugar de firmar tokens débiles.
     throw new Error('JWT_SECRET is not configured.');
   }
   return jwt.sign({ id: payload.id, role: payload.role }, env.jwtSecret, {
@@ -26,10 +26,10 @@ const signToken = (payload) => {
 };
 
 /**
- * Verifies a token signature and expiration.
- * @param {string} token - Raw JWT extracted from the Authorization header.
- * @returns {{ id: number, role: string }} Decoded claims.
- * @throws {AuthenticationError} When the token is invalid or expired.
+ * Verifica la firma y expiración de un token.
+ * @param {string} token - JWT extraído directamente del encabezado Authorization.
+ * @returns {{ id: number, role: string }} Claims decodificados.
+ * @throws {AuthenticationError} Si el token es inválido o ha expirado.
  */
 const verifyToken = (token) => {
   try {
