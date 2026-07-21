@@ -1,9 +1,10 @@
 /**
- * Observation repository — owns all SQL against the observations table.
- * Observations belong to their authoring professional; patients see
- * only rows flagged visible_to_patient (Part 5).
+ * Repositorio de observaciones: gestiona todo el SQL de la tabla
+ * observations.
+ *
+ * Las observaciones pertenecen al profesional autor. Los pacientes
+ * solo ven registros marcados como visibles para ellos (Parte 5).
  */
-
 const { BaseRepository } = require('./base.repository');
 
 const BASE_SELECT = `
@@ -23,11 +24,12 @@ class ObservationRepository extends BaseRepository {
   }
 
   /**
-   * Lists observations with filters and pagination.
-   * @param {Object} filters - { patientId, professionalId, visibleToPatient }.
-   * @param {Object} options - { limit, offset }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+ * Lista observaciones con filtros y paginación.
+ *
+ * @param {Object} filters - { patientId, professionalId, visibleToPatient }.
+ * @param {Object} options - { limit, offset }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findAll(filters, { limit, offset }) {
     const conditions = ['o.deleted_at IS NULL'];
     const params = [];
@@ -63,10 +65,11 @@ class ObservationRepository extends BaseRepository {
   }
 
   /**
-   * Finds one observation (with names) by id.
-   * @param {number} id
-   * @returns {Promise<Object|null>}
-   */
+ * Busca una observación por ID incluyendo nombres relacionados.
+ *
+ * @param {number} id
+ * @returns {Promise<Object|null>}
+ */
   async findDetailedById(id) {
     const result = await this.execute(
       `${BASE_SELECT} WHERE o.id = $1 AND o.deleted_at IS NULL`,
@@ -75,11 +78,12 @@ class ObservationRepository extends BaseRepository {
     return result.rows[0] || null;
   }
 
-  /**
-   * Creates an observation.
-   * @param {Object} data
-   * @returns {Promise<Object>}
-   */
+ /**
+ * Crea una observación.
+ *
+ * @param {Object} data
+ * @returns {Promise<Object>}
+ */
   async create(data) {
     const result = await this.execute(
       `INSERT INTO observations
@@ -100,12 +104,13 @@ class ObservationRepository extends BaseRepository {
   }
 
   /**
-   * Updates an observation. Authorship is enforced in the service
-   * layer (only the authoring professional may edit).
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+ * Actualiza una observación. La autoría se valida en la capa de servicio
+ * (solo el profesional autor puede editar).
+ *
+ * @param {number} id
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async update(id, data) {
     const result = await this.execute(
       `UPDATE observations
