@@ -1,9 +1,10 @@
 /**
- * Medication repository — owns all SQL against medications (catalog)
- * and patient_medications (prescriptions). Prescription history is
- * always preserved (Part 5): status transitions + soft delete only.
+ * Repositorio de medicamentos: gestiona SQL de medications (catálogo)
+ * y patient_medications (prescripciones).
+ *
+ * El historial de prescripciones siempre se conserva (Parte 5):
+ * cambios de estado y borrado lógico.
  */
-
 const { BaseRepository } = require('./base.repository');
 
 const PRESCRIPTION_SELECT = `
@@ -26,10 +27,11 @@ class MedicationRepository extends BaseRepository {
   }
 
   /**
-   * Lists the medication catalog (optionally filtered by name search).
-   * @param {string} [search]
-   * @returns {Promise<Array<Object>>}
-   */
+ * Lista el catálogo de medicamentos (con búsqueda opcional por nombre).
+ *
+ * @param {string} [search]
+ * @returns {Promise<Array<Object>>}
+ */
   async findCatalog(search) {
     if (search) {
       const result = await this.execute(
@@ -46,12 +48,12 @@ class MedicationRepository extends BaseRepository {
     );
     return result.rows;
   }
-
-  /**
-   * Checks a catalog medication exists.
-   * @param {number} medicationId
-   * @returns {Promise<boolean>}
-   */
+/**
+ * Verifica que un medicamento del catálogo exista.
+ *
+ * @param {number} medicationId
+ * @returns {Promise<boolean>}
+ */
   async medicationExists(medicationId) {
     const result = await this.execute(
       'SELECT 1 FROM medications WHERE id = $1 AND deleted_at IS NULL',
@@ -60,12 +62,13 @@ class MedicationRepository extends BaseRepository {
     return result.rowCount > 0;
   }
 
-  /**
-   * Lists prescriptions with filters and pagination.
-   * @param {Object} filters - { patientId, professionalId, status }.
-   * @param {Object} options - { limit, offset }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+/**
+ * Lista prescripciones con filtros y paginación.
+ *
+ * @param {Object} filters - { patientId, professionalId, status }.
+ * @param {Object} options - { limit, offset }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findPrescriptions(filters, { limit, offset }) {
     const conditions = ['pm.deleted_at IS NULL'];
     const params = [];
@@ -101,10 +104,11 @@ class MedicationRepository extends BaseRepository {
   }
 
   /**
-   * Finds one prescription (with names) by id.
-   * @param {number} id
-   * @returns {Promise<Object|null>}
-   */
+ * Busca una prescripción por ID incluyendo nombres relacionados.
+ *
+ * @param {number} id
+ * @returns {Promise<Object|null>}
+ */
   async findPrescriptionById(id) {
     const result = await this.execute(
       `${PRESCRIPTION_SELECT} WHERE pm.id = $1 AND pm.deleted_at IS NULL`,
@@ -114,10 +118,11 @@ class MedicationRepository extends BaseRepository {
   }
 
   /**
-   * Creates a prescription.
-   * @param {Object} data
-   * @returns {Promise<Object>}
-   */
+ * Crea una prescripción.
+ *
+ * @param {Object} data
+ * @returns {Promise<Object>}
+ */
   async createPrescription(data) {
     const result = await this.execute(
       `INSERT INTO patient_medications
@@ -141,11 +146,12 @@ class MedicationRepository extends BaseRepository {
   }
 
   /**
-   * Updates a prescription (dosage, schedule and/or status).
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+ * Actualiza una prescripción (dosis, horario o estado).
+ *
+ * @param {number} id
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async updatePrescription(id, data) {
     const result = await this.execute(
       `UPDATE patient_medications
@@ -159,8 +165,8 @@ class MedicationRepository extends BaseRepository {
         WHERE id = $1 AND deleted_at IS NULL
         RETURNING *`,
       [
-        /* `|| null` filters empty strings: Postgres rejects '' as a date,
-           and COALESCE keeps the current value when null is passed. */
+      // `|| null` filtra cadenas vacías: PostgreSQL rechaza '' en fechas
+      // y COALESCE mantiene el valor actual cuando recibe null.
         id,
         data.dosage || null,
         data.frequency || null,
