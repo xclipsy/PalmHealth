@@ -1,8 +1,9 @@
 /**
- * Routine repository — owns all SQL against routines (catalog) and
- * patient_routines (assignments). Patients read; professionals manage.
+ * Repositorio de rutinas: gestiona todo el SQL de routines (catálogo)
+ * y patient_routines (asignaciones).
+ *
+ * Los pacientes consultan; los profesionales administran.
  */
-
 const { BaseRepository } = require('./base.repository');
 
 const ASSIGNMENT_SELECT = `
@@ -25,11 +26,12 @@ class RoutineRepository extends BaseRepository {
     super('patient_routines');
   }
 
-  /**
-   * Lists the routine catalog, optionally filtered by type.
-   * @param {string} [type] - EXERCISE | NUTRITION | LIFESTYLE.
-   * @returns {Promise<Array<Object>>}
-   */
+/**
+ * Lista el catálogo de rutinas, con filtro opcional por tipo.
+ *
+ * @param {string} [type] - EXERCISE | NUTRITION | LIFESTYLE.
+ * @returns {Promise<Array<Object>>}
+ */
   async findCatalog(type) {
     if (type) {
       const result = await this.execute(
@@ -45,12 +47,12 @@ class RoutineRepository extends BaseRepository {
     );
     return result.rows;
   }
-
-  /**
-   * Checks a catalog routine exists.
-   * @param {number} routineId
-   * @returns {Promise<boolean>}
-   */
+/**
+ * Verifica que una rutina del catálogo exista.
+ *
+ * @param {number} routineId
+ * @returns {Promise<boolean>}
+ */
   async routineExists(routineId) {
     const result = await this.execute(
       'SELECT 1 FROM routines WHERE id = $1 AND deleted_at IS NULL',
@@ -59,12 +61,13 @@ class RoutineRepository extends BaseRepository {
     return result.rowCount > 0;
   }
 
-  /**
-   * Lists routine assignments with filters and pagination.
-   * @param {Object} filters - { patientId, professionalId, status }.
-   * @param {Object} options - { limit, offset }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+/**
+ * Lista asignaciones de rutinas con filtros y paginación.
+ *
+ * @param {Object} filters - { patientId, professionalId, status }.
+ * @param {Object} options - { limit, offset }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findAssignments(filters, { limit, offset }) {
     const conditions = ['prt.deleted_at IS NULL'];
     const params = [];
@@ -100,10 +103,11 @@ class RoutineRepository extends BaseRepository {
   }
 
   /**
-   * Finds one routine assignment (with names) by id.
-   * @param {number} id
-   * @returns {Promise<Object|null>}
-   */
+ * Busca una asignación de rutina por ID incluyendo nombres relacionados.
+ *
+ * @param {number} id
+ * @returns {Promise<Object|null>}
+ */
   async findAssignmentById(id) {
     const result = await this.execute(
       `${ASSIGNMENT_SELECT} WHERE prt.id = $1 AND prt.deleted_at IS NULL`,
@@ -112,11 +116,12 @@ class RoutineRepository extends BaseRepository {
     return result.rows[0] || null;
   }
 
-  /**
-   * Assigns a routine to a patient.
-   * @param {Object} data
-   * @returns {Promise<Object>}
-   */
+ /**
+ * Asigna una rutina a un paciente.
+ *
+ * @param {Object} data
+ * @returns {Promise<Object>}
+ */
   async createAssignment(data) {
     const result = await this.execute(
       `INSERT INTO patient_routines
@@ -139,11 +144,12 @@ class RoutineRepository extends BaseRepository {
   }
 
   /**
-   * Updates a routine assignment (schedule and/or status).
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+ * Actualiza una asignación de rutina (horario o estado).
+ *
+ * @param {number} id
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async updateAssignment(id, data) {
     const result = await this.execute(
       `UPDATE patient_routines
@@ -156,8 +162,8 @@ class RoutineRepository extends BaseRepository {
         WHERE id = $1 AND deleted_at IS NULL
         RETURNING *`,
       [
-        /* `|| null` filters empty strings: Postgres rejects '' as a date,
-           and COALESCE keeps the current value when null is passed. */
+       // `|| null` filtra cadenas vacías: PostgreSQL rechaza '' en fechas
+       // y COALESCE mantiene el valor actual cuando recibe null.
         id,
         data.schedule || null,
         data.instructions || null,
