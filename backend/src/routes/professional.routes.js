@@ -1,11 +1,15 @@
 /**
- * Professional routes — /api/professional/*
+ * Rutas de profesional — /api/professional/*
  *
- * Chain per request (Parts 3, 5, 6): authenticateToken ->
- * authorizeRole (router perimeter) -> attachProfessionalProfile
- * (ownership root) -> verifyPatientAssignment for URL patient ids ->
- * validators -> controller. Body-level patient ids are re-verified
- * inside the service.
+ * Cadena por solicitud (Partes 3, 5 y 6):
+ * authenticateToken ->
+ * authorizeRole (protección del router) ->
+ * attachProfessionalProfile (raíz de autorización) ->
+ * verifyPatientAssignment para pacientes indicados en la URL ->
+ * validadores -> controlador.
+ *
+ * Los IDs de pacientes enviados en el cuerpo se validan nuevamente
+ * dentro de la capa de servicio.
  */
 
 const express = require('express');
