@@ -1,8 +1,9 @@
 /**
- * Standardized API response helpers (Part 8 of the specification).
+ * Utilidades estandarizadas de respuestas API (Parte 8 de la especificación).
  *
- * Every response in the application — success or error — carries the
- * exact same four-key JSON shape so the frontend can rely on it:
+ * Cada respuesta de la aplicación —éxito o error— utiliza exactamente
+ * la misma estructura JSON de cuatro claves para que el frontend pueda
+ * depender de ella:
  *   {
  *     "success": boolean,
  *     "message": string,
@@ -14,13 +15,14 @@
 const { HTTP_STATUS } = require('../constants/http-status.constants');
 
 /**
- * Sends a success response.
+ * Envía una respuesta exitosa.
+ *
  * @param {import('express').Response} res
  * @param {Object} options
  * @param {number} [options.statusCode=200]
- * @param {string} options.message - User-facing message in Spanish.
+ * @param {string} options.message - Mensaje visible para el usuario en español.
  * @param {*} [options.data=null]
- * @param {Object} [options.pagination] - Optional pagination metadata for list endpoints.
+ * @param {Object} [options.pagination] - Metadatos de paginación opcionales para endpoints de listado.
  */
 const sendSuccess = (res, { statusCode = HTTP_STATUS.OK, message, data = null, pagination }) => {
   res.status(statusCode).json({
@@ -33,13 +35,15 @@ const sendSuccess = (res, { statusCode = HTTP_STATUS.OK, message, data = null, p
 };
 
 /**
- * Sends an error response. Used only by the error middlewares — business
- * code must throw AppError subclasses instead of calling this directly.
+ * Envía una respuesta de error. Se utiliza únicamente por los middlewares
+ * de manejo de errores; el código de negocio debe lanzar subclases de
+ * AppError en lugar de llamar a esta función directamente.
+ *
  * @param {import('express').Response} res
  * @param {Object} options
  * @param {number} options.statusCode
- * @param {string} options.message - Safe, user-facing message in Spanish.
- * @param {Array<Object>|null} [options.errors=null] - Field-level details.
+ * @param {string} options.message - Mensaje seguro y visible para el usuario en español.
+ * @param {Array<Object>|null} [options.errors=null] - Detalles específicos de campos.
  */
 const sendError = (res, { statusCode, message, errors = null }) => {
   res.status(statusCode).json({
