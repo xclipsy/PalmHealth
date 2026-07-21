@@ -1,52 +1,64 @@
 /**
- * Application-wide constants.
+ * Constantes generales de la aplicación.
  *
- * No magic numbers or magic strings in business code — every fixed
- * domain value is declared here (Part 10 of the specification).
+ * Centraliza valores fijos para evitar datos repetidos en el código.
  */
-
 /** User roles. Exactly two roles exist in the system — no admin. */
 const USER_ROLES = Object.freeze({
   PATIENT: 'PATIENT',
   PROFESSIONAL: 'PROFESSIONAL',
 });
 
-/** Account states. Only ACTIVE accounts can authenticate. */
+/**
+ * Estados de cuenta.
+ *
+ * Solo las cuentas activas pueden autenticarse.
+ */
 const USER_STATUS = Object.freeze({
   ACTIVE: 'ACTIVE',
   INACTIVE: 'INACTIVE',
   SUSPENDED: 'SUSPENDED',
 });
 
-/** Appointment lifecycle states. */
+/**
+ * Estados del ciclo de vida de las citas.
+ */
 const APPOINTMENT_STATUS = Object.freeze({
   SCHEDULED: 'SCHEDULED',
   COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED',
 });
 
-/** Treatment lifecycle states. */
+/**
+ * Estados del ciclo de vida de los tratamientos.
+ */
 const TREATMENT_STATUS = Object.freeze({
   ACTIVE: 'ACTIVE',
   COMPLETED: 'COMPLETED',
   SUSPENDED: 'SUSPENDED',
 });
 
-/** Patient ⇄ professional assignment states (Part 7). */
+/**
+ * Estados de asignación entre pacientes y profesionales.
+ */
 const ASSIGNMENT_STATUS = Object.freeze({
   ACTIVE: 'ACTIVE',
   COMPLETED: 'COMPLETED',
   INACTIVE: 'INACTIVE',
 });
 
-/** Routine categories (Part 7). */
+/**
+ * Categorías de rutinas (Parte 7).
+ */
 const ROUTINE_TYPES = Object.freeze({
   EXERCISE: 'EXERCISE',
   NUTRITION: 'NUTRITION',
   LIFESTYLE: 'LIFESTYLE',
 });
 
-/** Notification types (Part 7). */
+/**
+ * Tipos de notificaciones (Parte 7).
+ */
 const NOTIFICATION_TYPES = Object.freeze({
   APPOINTMENT: 'APPOINTMENT',
   MEDICATION: 'MEDICATION',
@@ -55,7 +67,9 @@ const NOTIFICATION_TYPES = Object.freeze({
   SYSTEM: 'SYSTEM',
 });
 
-/** Clinical status badges shown on patient cards (Part 5). */
+/**
+ * Estados clínicos mostrados en tarjetas de pacientes (Parte 5).
+ */
 const PATIENT_CONDITION = Object.freeze({
   STABLE: 'STABLE',
   MONITORING: 'MONITORING',
@@ -63,20 +77,28 @@ const PATIENT_CONDITION = Object.freeze({
   TREATMENT_COMPLETED: 'TREATMENT_COMPLETED',
 });
 
-/** Symptom intensity bounds (Part 4: scale of 1 to 10). */
+/**
+ * Rango de intensidad de síntomas (Parte 4: escala de 1 a 10).
+ */
 const SYMPTOM_INTENSITY = Object.freeze({
   MIN: 1,
   MAX: 10,
 });
 
-/** Default pagination values for list endpoints (Part 8). */
+/**
+ * Valores de paginación por defecto para endpoints de listas (Parte 8).
+ */
 const PAGINATION = Object.freeze({
   DEFAULT_PAGE: 1,
   DEFAULT_LIMIT: 10,
   MAX_LIMIT: 100,
 });
 
-/** Appointment defaults — mirrors the DB default in 007_appointments.sql. */
+/**
+ * Valores predeterminados de citas.
+ *
+ * Mantiene sincronizado el valor por defecto de la BD en 007_appointments.sql.
+ */
 const APPOINTMENT_DEFAULTS = Object.freeze({
   DURATION_MINUTES: 30,
 });
