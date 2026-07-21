@@ -1,6 +1,7 @@
 /**
- * Patient repository — owns all SQL against the patients table.
- * Module 4 scope: creation during registration and profile lookup.
+ * Repositorio de pacientes: gestiona todo el SQL de la tabla patients.
+ *
+ * Alcance del Módulo 4: creación durante el registro y consulta de perfil.
  */
 
 const { BaseRepository } = require('./base.repository');
@@ -10,13 +11,14 @@ class PatientRepository extends BaseRepository {
     super('patients');
   }
 
-  /**
-   * Inserts the patient profile inside an existing transaction client
-   * (registration creates users + patients atomically).
-   * @param {import('pg').PoolClient} client - Transaction client.
-   * @param {Object} data - Patient profile fields.
-   * @returns {Promise<Object>} The created row.
-   */
+ /**
+ * Inserta el perfil del paciente dentro de una transacción existente
+ * (el registro crea users + patients de forma atómica).
+ *
+ * @param {import('pg').PoolClient} client - Cliente de transacción.
+ * @param {Object} data - Campos del perfil del paciente.
+ * @returns {Promise<Object>} Registro creado.
+ */
   async createWithClient(client, data) {
     const result = await client.query(
       `INSERT INTO patients
@@ -39,10 +41,11 @@ class PatientRepository extends BaseRepository {
   }
 
   /**
-   * Finds the patient profile linked to a user account.
-   * @param {number} userId
-   * @returns {Promise<Object|null>}
-   */
+ * Busca el perfil del paciente asociado a una cuenta de usuario.
+ *
+ * @param {number} userId
+ * @returns {Promise<Object|null>}
+ */
   async findByUserId(userId) {
     const result = await this.execute(
       'SELECT * FROM patients WHERE user_id = $1 AND deleted_at IS NULL',
@@ -52,12 +55,15 @@ class PatientRepository extends BaseRepository {
   }
 
   /**
-   * Updates the patient-editable profile fields (Part 4: phone, photo,
-   * emergency contact — never email, name or birth date).
-   * @param {number} id - patients.id
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+ * Actualiza campos editables del perfil del paciente (Parte 4):
+ * teléfono, foto y contacto de emergencia.
+ *
+ * Nunca modifica email, nombre ni fecha de nacimiento.
+ *
+ * @param {number} id - patients.id
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async updateProfile(id, data) {
     const result = await this.execute(
       `UPDATE patients
@@ -80,11 +86,13 @@ class PatientRepository extends BaseRepository {
   }
 
   /**
-   * Finds a patient profile by account email (medical linking flow:
-   * a professional links a patient using their registered email).
-   * @param {string} email - Normalized (lowercased) email.
-   * @returns {Promise<Object|null>}
-   */
+ * Busca un perfil de paciente por correo de la cuenta (flujo de
+ * vinculación médica: el profesional vincula al paciente usando su
+ * correo registrado).
+ *
+ * @param {string} email - Correo normalizado (en minúsculas).
+ * @returns {Promise<Object|null>}
+ */
   async findByEmail(email) {
     const result = await this.execute(
       `SELECT p.*, u.email
@@ -96,12 +104,13 @@ class PatientRepository extends BaseRepository {
     return result.rows[0] || null;
   }
 
-  /**
-   * Full profile with the account email (professional's patient view
-   * and the patient's own profile page).
-   * @param {number} id - patients.id
-   * @returns {Promise<Object|null>}
-   */
+/**
+ * Perfil completo con el correo de la cuenta (vista del paciente por
+ * parte del profesional y página de perfil del propio paciente).
+ *
+ * @param {number} id - patients.id
+ * @returns {Promise<Object|null>}
+ */
   async findWithEmail(id) {
     const result = await this.execute(
       `SELECT p.*, u.email
