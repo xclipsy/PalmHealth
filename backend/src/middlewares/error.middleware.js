@@ -1,11 +1,8 @@
 /**
- * Global error handling middlewares.
+ * Middlewares globales de manejo de errores.
  *
- * Registered last in app.js. Converts thrown errors into the
- * standardized JSON response format:
- *   { success: false, message, data: null, errors }
- *
- * Never leaks stack traces, SQL or internal paths to the client.
+ * Registrados al final en app.js. Transforman errores al formato
+ * JSON estándar sin exponer trazas, SQL ni rutas internas al cliente.
  */
 
 const { AppError } = require('../errors/app.errors');
@@ -14,8 +11,9 @@ const { sendError } = require('../utils/response.util');
 const { logger } = require('../utils/logger.util');
 
 /**
- * 404 handler for unknown API routes.
- * (Non-API routes are handled by the SPA fallback before this runs.)
+ * Manejo 404 para rutas API no existentes.
+ *
+ * Las rutas no API son gestionadas por el fallback de la SPA.
  */
 const notFoundHandler = (req, res) => {
   sendError(res, {
@@ -25,9 +23,10 @@ const notFoundHandler = (req, res) => {
 };
 
 /**
- * Global error handler. Operational AppErrors respond with their own
- * status and message; unexpected errors respond with a generic 500.
- * Every unexpected error is logged internally with full detail.
+ * Manejador global de errores.
+ *
+ * Los AppErrors usan su propio estado y mensaje; errores inesperados
+ * responden con 500 genérico y se registran internamente con detalle.
  */
 // eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
@@ -39,15 +38,14 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
-  // Malformed JSON body from express.json() — client error, not a 500.
+  // JSON mal formado recibido por express.json(): error del cliente, no 500.
   if (err.type === 'entity.parse.failed') {
     return sendError(res, {
       statusCode: HTTP_STATUS.BAD_REQUEST,
       message: 'El cuerpo de la solicitud no es un JSON válido.',
     });
   }
-
-  // Unexpected error: log internally, respond generically.
+// Error inesperado: registrar internamente y responder de forma genérica.
   logger.error(`Unexpected error on ${req.method} ${req.originalUrl}`, err);
 
   return sendError(res, {
