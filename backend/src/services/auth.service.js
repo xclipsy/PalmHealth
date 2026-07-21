@@ -1,17 +1,18 @@
 /**
- * Authentication service (Part 3 of the specification).
+ * Servicio de autenticación (Parte 3 de la especificación).
  *
- * All authentication business logic lives here: registration (atomic
- * user + role profile creation), login (bcrypt comparison + account
- * status check) and profile retrieval. Controllers stay thin;
- * repositories own the SQL.
+ * Toda la lógica de negocio de autenticación vive aquí: registro
+ * (creación atómica de usuario + perfil según rol), inicio de sesión
+ * (comparación con bcrypt + verificación del estado de la cuenta) y
+ * obtención del perfil. Los controladores se mantienen ligeros;
+ * los repositorios son responsables del SQL.
  *
- * Security rules enforced:
- * - Passwords only exist as bcrypt hashes at rest.
- * - Login errors never reveal whether the email or the password was
- *   wrong (anti user-enumeration).
- * - Only ACTIVE accounts can authenticate.
- * - JWT payload carries only { id, role }.
+ * Reglas de seguridad aplicadas:
+ * - Las contraseñas solo existen como hashes bcrypt almacenados.
+ * - Los errores de inicio de sesión nunca revelan si el correo o la
+ *   contraseña fueron incorrectos (protección contra enumeración de usuarios).
+ * - Solo las cuentas ACTIVE pueden autenticarse.
+ * - El payload del JWT contiene únicamente { id, role }.
  */
 
 const { withTransaction } = require('../config/database.config');
@@ -27,14 +28,19 @@ const {
   NotFoundError,
 } = require('../errors/app.errors');
 
-/** Uniform login failure message — never reveals which field failed. */
+/**
+ * Mensaje uniforme de fallo de inicio de sesión: nunca revela qué
+ * campo fue incorrecto.
+ */
 const INVALID_CREDENTIALS_MESSAGE = 'Correo electrónico o contraseña incorrectos.';
 
 /**
- * Shapes the public user object returned to the frontend.
- * Never includes password_hash or internal columns.
- * @param {Object} user - users row (safe columns).
- * @param {Object} profile - patients or professionals row.
+ * Construye el objeto público de usuario que se devuelve al frontend.
+ *
+ * Nunca incluye password_hash ni columnas internas.
+ *
+ * @param {Object} user - Fila de users (columnas seguras).
+ * @param {Object} profile - Fila de patients o professionals.
  * @returns {Object}
  */
 const buildPublicUser = (user, profile) => ({
@@ -65,11 +71,12 @@ const buildPublicUser = (user, profile) => ({
 });
 
 /**
- * Registers a new patient account. Creates the users row and the
- * patients profile atomically — either both exist or neither does.
- * @param {Object} data - Validated registration payload.
+ * Registra una nueva cuenta de paciente. Crea la fila de users y el
+ * perfil de patients de forma atómica: ambos se crean o ninguno existe.
+ *
+ * @param {Object} data - Datos de registro validados.
  * @returns {Promise<{ token: string, user: Object }>}
- * @throws {ConflictError} When the email is already registered.
+ * @throws {ConflictError} Cuando el correo ya está registrado.
  */
 const registerPatient = async (data) => {
   const email = data.email.toLowerCase().trim();
@@ -102,13 +109,14 @@ const registerPatient = async (data) => {
   const token = signToken({ id: user.id, role: user.role });
   return { token, user: buildPublicUser(user, profile) };
 };
-
 /**
- * Registers a new professional account. Same atomic pattern as
- * registerPatient, plus medical license uniqueness validation.
- * @param {Object} data - Validated registration payload.
+ * Registra una nueva cuenta de profesional. Utiliza el mismo patrón
+ * atómico que registerPatient, además de validar la unicidad de la
+ * licencia médica.
+ *
+ * @param {Object} data - Datos de registro validados.
  * @returns {Promise<{ token: string, user: Object }>}
- * @throws {ConflictError} When the email or license already exists.
+ * @throws {ConflictError} Cuando el correo o la licencia ya existen.
  */
 const registerProfessional = async (data) => {
   const email = data.email.toLowerCase().trim();
@@ -144,15 +152,15 @@ const registerProfessional = async (data) => {
   const token = signToken({ id: user.id, role: user.role });
   return { token, user: buildPublicUser(user, profile) };
 };
-
 /**
- * Authenticates a user with email + password.
+ * Autentica un usuario mediante correo y contraseña.
+ *
  * @param {string} email
  * @param {string} password
  * @returns {Promise<{ token: string, user: Object }>}
- * @throws {AuthenticationError} On unknown email, wrong password or
- *   non-ACTIVE account — always with the same generic message for
- *   credential failures.
+ * @throws {AuthenticationError} Cuando el correo no existe, la contraseña
+ *   es incorrecta o la cuenta no está ACTIVE. Siempre utiliza el mismo
+ *   mensaje genérico para fallos de credenciales.
  */
 const login = async (email, password) => {
   const normalizedEmail = email.toLowerCase().trim();
@@ -179,8 +187,9 @@ const login = async (email, password) => {
       : await professionalRepository.findByUserId(user.id);
 
   if (!profile) {
-    // Account exists but its role profile is missing — data integrity
-    // issue; treat as authentication failure without leaking details.
+// La cuenta existe, pero falta su perfil asociado al rol.
+// Es un problema de integridad de datos; se trata como un fallo de
+// autenticación sin revelar detalles.
     throw new AuthenticationError(INVALID_CREDENTIALS_MESSAGE);
   }
 
@@ -189,10 +198,11 @@ const login = async (email, password) => {
 };
 
 /**
- * Returns the authenticated user's public profile.
- * @param {number} userId - From the verified JWT.
+ * Devuelve el perfil público del usuario autenticado.
+ *
+ * @param {number} userId - Obtenido del JWT verificado.
  * @returns {Promise<Object>}
- * @throws {NotFoundError} When the account or profile no longer exists.
+ * @throws {NotFoundError} Cuando la cuenta o el perfil ya no existen.
  */
 const getProfile = async (userId) => {
   const user = await userRepository.findSafeById(userId);
