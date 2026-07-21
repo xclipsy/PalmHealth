@@ -1,28 +1,28 @@
 /**
- * Authentication and authorization middlewares (Part 3).
+ * Middlewares de autenticación y autorización (Parte 3).
  *
- * Authorization chain: authenticateToken -> authorizeRole(...) ->
- * ownership middleware/service checks -> controller. Every private
- * route passes through this chain before any business logic runs.
+ * Cadena de autorización: authenticateToken -> authorizeRole(...) ->
+ * validación de propiedad -> controlador. Las rutas privadas pasan
+ * por esta cadena antes de ejecutar lógica de negocio.
  */
-
 const { verifyToken } = require('../utils/jwt.util');
 const { userRepository } = require('../repositories/user.repository');
 const { USER_STATUS } = require('../constants/app.constants');
 const { AuthenticationError, AuthorizationError } = require('../errors/app.errors');
 
-/** Expected authorization scheme: "Bearer <token>". */
+/**
+ * Esquema de autorización esperado: "Bearer <token>".
+ */
 const BEARER_PREFIX = 'Bearer ';
 
 /**
- * Verifies the Bearer JWT and attaches { id, role } to req.user.
+ * Verifica el JWT Bearer y agrega { id, role } a req.user.
  *
- * Steps (in order, failing fast):
- *   1. Header present and uses the Bearer scheme.
- *   2. Token signature and expiration are valid.
- *   3. The user still exists (not soft-deleted).
- *   4. The account is ACTIVE (suspended/inactive users lose access
- *      immediately, even with a still-valid token).
+ * Validaciones:
+ * 1. Header presente con esquema Bearer.
+ * 2. Token válido y no expirado.
+ * 3. Usuario existente y no eliminado.
+ * 4. Cuenta activa para permitir acceso.
  *
  * @param {import('express').Request} req
  * @param {import('express').Response} res
@@ -51,8 +51,8 @@ const authenticateToken = async (req, res, next) => {
       throw new AuthenticationError('Tu cuenta no está activa.');
     }
 
-    // Minimal identity for downstream layers — role comes from the
-    // database row, not the token, so demotions apply instantly.
+  // Identidad mínima para capas posteriores: el rol viene de la BD,
+// no del token, permitiendo aplicar cambios de permisos al instante.
     req.user = { id: user.id, role: user.role };
     next();
   } catch (error) {
@@ -61,10 +61,10 @@ const authenticateToken = async (req, res, next) => {
 };
 
 /**
- * Role guard factory. Must run after authenticateToken.
- * @param {...string} roles - Allowed roles (USER_ROLES values).
- * @returns {import('express').RequestHandler} 403 when the
- *   authenticated user's role is not in the allowed list.
+ * Fábrica de guardas por rol. Se ejecuta después de authenticateToken.
+ *
+ * @param {...string} roles - Roles permitidos (valores de USER_ROLES).
+ * @returns {import('express').RequestHandler} 403 si el rol no está autorizado.
  */
 const authorizeRole = (...roles) => (req, res, next) => {
   if (!req.user) {
