@@ -1,27 +1,30 @@
 /**
- * Password hashing helpers (Part 3 of the specification).
+ * Utilidades de hash de contraseñas (Parte 3 de la especificación).
  *
- * bcrypt with a configurable cost factor (BCRYPT_SALT_ROUNDS, default
- * 12). Plain-text passwords exist only in memory during the request
- * that carries them — they are never persisted or logged.
+ * Utiliza bcrypt con un factor de costo configurable
+ * (BCRYPT_SALT_ROUNDS, valor predeterminado 12). Las contraseñas en
+ * texto plano solo existen en memoria durante la solicitud que las
+ * recibe; nunca se almacenan ni se registran en logs.
  */
 
 const bcrypt = require('bcrypt');
 const { env } = require('../config/env.config');
 
 /**
- * Hashes a plain-text password.
+ * Genera el hash de una contraseña en texto plano.
+ *
  * @param {string} plainPassword
- * @returns {Promise<string>} bcrypt hash (includes salt + cost factor).
+ * @returns {Promise<string>} Hash bcrypt (incluye salt + factor de costo).
  */
 const hashPassword = (plainPassword) => bcrypt.hash(plainPassword, env.bcryptSaltRounds);
 
 /**
- * Compares a plain-text candidate against a stored hash in constant
- * time (handled internally by bcrypt).
- * @param {string} plainPassword - Candidate from the login request.
- * @param {string} passwordHash - Stored bcrypt hash.
- * @returns {Promise<boolean>} True when the password matches.
+ * Compara una contraseña en texto plano con un hash almacenado usando
+ * tiempo constante (gestionado internamente por bcrypt).
+ *
+ * @param {string} plainPassword - Contraseña candidata enviada en la solicitud de inicio de sesión.
+ * @param {string} passwordHash - Hash bcrypt almacenado.
+ * @returns {Promise<boolean>} True cuando la contraseña coincide.
  */
 const comparePassword = (plainPassword, passwordHash) =>
   bcrypt.compare(plainPassword, passwordHash);
