@@ -1,7 +1,8 @@
 /**
- * Notification service — business logic for the notification center
- * plus the internal emitters other services call when clinical events
- * happen (appointment scheduled, symptom logged, treatment assigned).
+ * Servicio de notificaciones: contiene la lógica de negocio del centro
+ * de notificaciones y los emisores internos que otros servicios llaman
+ * cuando ocurren eventos clínicos (cita programada, síntoma registrado,
+ * tratamiento asignado).
  */
 
 const { notificationRepository } = require('../repositories/notification.repository');
@@ -10,7 +11,9 @@ const { NOTIFICATION_TYPES } = require('../constants/app.constants');
 const { logger } = require('../utils/logger.util');
 
 /**
- * Lists the caller's notifications with read-status filter.
+ * Lista las notificaciones del usuario solicitante con filtro por estado
+ * de lectura.
+ *
  * @param {number} userId
  * @param {Object} filters - { isRead }.
  * @param {Object} pagination - { limit, offset }.
@@ -18,9 +21,9 @@ const { logger } = require('../utils/logger.util');
  */
 const listForUser = (userId, filters, pagination) =>
   notificationRepository.findByUser(userId, filters, pagination);
-
 /**
- * Marks one of the caller's notifications as read.
+ * Marca como leída una de las notificaciones del usuario solicitante.
+ *
  * @param {number} id
  * @param {number} userId
  * @returns {Promise<Object>}
@@ -34,7 +37,9 @@ const markAsRead = async (id, userId) => {
 };
 
 /**
- * Removes one of the caller's notifications (soft delete).
+ * Elimina una de las notificaciones del usuario solicitante
+ * (eliminación lógica mediante soft delete).
+ *
  * @param {number} id
  * @param {number} userId
  * @returns {Promise<void>}
@@ -47,9 +52,10 @@ const remove = async (id, userId) => {
 };
 
 /**
- * Internal emitter used by other services. Failures are logged but
- * never break the main business operation (a lost notification must
- * not roll back an appointment or prescription).
+ * Emisor interno utilizado por otros servicios. Los fallos se registran
+ * en los logs, pero nunca interrumpen la operación principal de negocio
+ * (una notificación perdida no debe revertir una cita o una receta).
+ *
  * @param {Object} data - { userId, type, title, message, relatedEntity, relatedId }.
  * @returns {Promise<void>}
  */
