@@ -1,13 +1,16 @@
 /**
- * Appointment repository — owns all SQL against the appointments table.
- * Joins pull the counterpart names so list endpoints need no extra
- * round trips. All queries are parameterized and soft-delete aware.
+ * Repositorio de citas: gestiona todo el SQL de la tabla appointments.
+ *
+ * Incluye nombres relacionados en consultas, usa parámetros y respeta
+ * el borrado lógico.
  */
 
 const { BaseRepository } = require('./base.repository');
 const { APPOINTMENT_DEFAULTS } = require('../constants/app.constants');
 
-/** Whitelisted sort columns (guards against SQL injection via `sort`). */
+/**
+ * Columnas de ordenamiento permitidas (protege contra inyección SQL).
+ */
 const SORTABLE_COLUMNS = Object.freeze({
   scheduled_at: 'a.scheduled_at',
   status: 'a.status',
@@ -30,12 +33,12 @@ class AppointmentRepository extends BaseRepository {
   constructor() {
     super('appointments');
   }
-
-  /**
-   * Builds the WHERE fragment + params shared by list and count.
-   * @param {Object} filters
-   * @returns {{ where: string, params: Array<*> }}
-   */
+/**
+ * Construye el filtro WHERE y parámetros usados por listas y conteos.
+ *
+ * @param {Object} filters
+ * @returns {{ where: string, params: Array<*> }}
+ */
   buildFilters(filters) {
     const conditions = ['a.deleted_at IS NULL'];
     const params = [];
@@ -64,12 +67,13 @@ class AppointmentRepository extends BaseRepository {
     return { where: `WHERE ${conditions.join(' AND ')}`, params };
   }
 
-  /**
-   * Lists appointments with filters, sorting and pagination.
-   * @param {Object} filters - patientId/professionalId/status/from/to.
-   * @param {Object} options - { limit, offset, sort, order }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+/**
+ * Lista citas con filtros, ordenamiento y paginación.
+ *
+ * @param {Object} filters - patientId/professionalId/status/from/to.
+ * @param {Object} options - { limit, offset, sort, order }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findAll(filters, { limit, offset, sort = 'scheduled_at', order = 'asc' }) {
     const { where, params } = this.buildFilters(filters);
     const sortColumn = SORTABLE_COLUMNS[sort] || SORTABLE_COLUMNS.scheduled_at;
@@ -91,11 +95,12 @@ class AppointmentRepository extends BaseRepository {
     return { rows: listResult.rows, total: countResult.rows[0].total };
   }
 
-  /**
-   * Finds one appointment (with names) by id.
-   * @param {number} id
-   * @returns {Promise<Object|null>}
-   */
+ /**
+ * Busca una cita por ID incluyendo nombres relacionados.
+ *
+ * @param {number} id
+ * @returns {Promise<Object|null>}
+ */
   async findDetailedById(id) {
     const result = await this.execute(
       `${BASE_SELECT} WHERE a.id = $1 AND a.deleted_at IS NULL`,
@@ -105,10 +110,11 @@ class AppointmentRepository extends BaseRepository {
   }
 
   /**
-   * Creates an appointment.
-   * @param {Object} data
-   * @returns {Promise<Object>} The created row.
-   */
+ * Crea una cita.
+ *
+ * @param {Object} data
+ * @returns {Promise<Object>} Registro creado.
+ */
   async create(data) {
     const result = await this.execute(
       `INSERT INTO appointments
@@ -130,11 +136,12 @@ class AppointmentRepository extends BaseRepository {
   }
 
   /**
-   * Updates editable fields of an appointment.
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise<Object|null>} The updated row or null.
-   */
+ * Actualiza campos editables de una cita.
+ *
+ * @param {number} id
+ * @param {Object} data
+ * @returns {Promise<Object|null>} Registro actualizado o null.
+ */
   async update(id, data) {
     const result = await this.execute(
       `UPDATE appointments
@@ -148,8 +155,8 @@ class AppointmentRepository extends BaseRepository {
         WHERE id = $1 AND deleted_at IS NULL
         RETURNING *`,
       [
-        /* `|| null` filters empty strings: Postgres rejects '' as a
-           timestamp, and COALESCE keeps the current value on null. */
+        // `|| null` filtra cadenas vacías: PostgreSQL rechaza '' en timestamps
+        // y COALESCE mantiene el valor actual cuando recibe null.
         id,
         data.scheduledAt || null,
         data.durationMinutes || null,
@@ -162,13 +169,14 @@ class AppointmentRepository extends BaseRepository {
     return result.rows[0] || null;
   }
 
-  /**
-   * Cancels an appointment, storing the reason.
-   * @param {number} id
-   * @param {string} status - APPOINTMENT_STATUS.CANCELLED.
-   * @param {string} [reason]
-   * @returns {Promise<Object|null>} The updated row or null.
-   */
+ /**
+ * Cancela una cita guardando el motivo.
+ *
+ * @param {number} id
+ * @param {string} status - APPOINTMENT_STATUS.CANCELLED.
+ * @param {string} [reason]
+ * @returns {Promise<Object|null>} Registro actualizado o null.
+ */
   async cancel(id, status, reason) {
     const result = await this.execute(
       `UPDATE appointments
