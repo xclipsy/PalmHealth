@@ -1,21 +1,24 @@
 /**
- * Pagination utilities (Part 8 of the specification).
+ * Utilidades de paginación (Parte 8 de la especificación).
  *
- * Every list endpoint accepts `page` and `limit` query parameters and
- * returns a standardized `pagination` object. These helpers keep the
- * parsing and metadata construction in one place so services and
- * controllers never duplicate the logic.
+ * Todos los endpoints de listado aceptan los parámetros de consulta
+ * `page` y `limit` y devuelven un objeto `pagination` estandarizado.
+ *
+ * Estas funciones auxiliares mantienen el análisis de parámetros y la
+ * construcción de metadatos en un solo lugar, evitando duplicar lógica
+ * en servicios y controladores.
  */
 
 const { PAGINATION } = require('../constants/app.constants');
 
 /**
- * Parses and clamps pagination query parameters.
+ * Analiza y ajusta los parámetros de consulta de paginación.
  *
- * @param {object} queryParams - Express req.query.
- * @param {string|number} [queryParams.page] - Requested page (1-based).
- * @param {string|number} [queryParams.limit] - Requested page size.
- * @returns {{ page: number, limit: number, offset: number }} Safe values for SQL LIMIT/OFFSET.
+ * @param {object} queryParams - req.query de Express.
+ * @param {string|number} [queryParams.page] - Página solicitada (basada en 1).
+ * @param {string|number} [queryParams.limit] - Cantidad de elementos por página.
+ * @returns {{ page: number, limit: number, offset: number }} Valores seguros
+ * para SQL LIMIT/OFFSET.
  */
 const parsePagination = (queryParams = {}) => {
   const rawPage = Number(queryParams.page);
@@ -31,11 +34,12 @@ const parsePagination = (queryParams = {}) => {
 };
 
 /**
- * Builds the standardized pagination metadata for list responses.
+ * Construye los metadatos de paginación estandarizados para respuestas
+ * de listados.
  *
- * @param {number} totalItems - Total row count (before LIMIT/OFFSET).
- * @param {number} page - Current page (1-based).
- * @param {number} limit - Page size.
+ * @param {number} totalItems - Cantidad total de registros (antes de LIMIT/OFFSET).
+ * @param {number} page - Página actual (basada en 1).
+ * @param {number} limit - Tamaño de página.
  * @returns {{ page: number, limit: number, totalItems: number, totalPages: number }}
  */
 const buildPaginationMeta = (totalItems, page, limit) => ({
