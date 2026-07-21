@@ -1,14 +1,14 @@
 /**
- * Professional service — business logic for every /api/professional/*
- * endpoint.
+ * Servicio de profesionales: contiene la lógica de negocio para todos los
+ * endpoints de /api/professional/*.
  *
- * Ownership model (Parts 3, 5): a professional only operates on
- * patients with an ACTIVE assignment. Route-level guards check ids in
- * the URL; this service re-verifies ownership for ids arriving in
- * request bodies (e.g. patientId of a new appointment) so the rule
- * holds no matter where the id comes from.
+ * Modelo de propiedad (Partes 3 y 5): un profesional solo puede operar
+ * sobre pacientes con una asignación ACTIVE. Las protecciones a nivel de
+ * rutas verifican los IDs recibidos en la URL; este servicio vuelve a
+ * validar la propiedad de los IDs enviados en el cuerpo de la solicitud
+ * (por ejemplo, patientId de una nueva cita), garantizando la regla sin
+ * importar de dónde provenga el ID.
  */
-
 const { professionalRepository } = require('../repositories/professional.repository');
 const { patientRepository } = require('../repositories/patient.repository');
 const { assignmentRepository } = require('../repositories/assignment.repository');
@@ -31,13 +31,7 @@ const {
   NOTIFICATION_TYPES,
 } = require('../constants/app.constants');
 
-/**
- * Body-level ownership check: throws 403 unless the professional is
- * actively assigned to the patient.
- * @param {number} professionalId
- * @param {number} patientId
- * @returns {Promise<void>}
- */
+
 const assertAssigned = async (professionalId, patientId) => {
   const assigned = await assignmentRepository.isProfessionalAssignedToPatient(
     professionalId,
@@ -49,7 +43,8 @@ const assertAssigned = async (professionalId, patientId) => {
 };
 
 /**
- * Resolves a patient's user id (notification target).
+ * Obtiene el ID de usuario de un paciente (destinatario de notificaciones).
+ *
  * @param {number} patientId
  * @returns {Promise<number|null>}
  */
@@ -59,9 +54,11 @@ const patientUserId = async (patientId) => {
 };
 
 /**
- * Dashboard: today's appointments, assigned patients count, recent
- * symptoms of assigned patients, active treatments, unread count.
- * @param {Object} professional - req.professional row.
+ * Panel principal: citas del día, cantidad de pacientes asignados,
+ * síntomas recientes de pacientes asignados, tratamientos activos y
+ * contador de notificaciones no leídas.
+ *
+ * @param {Object} professional - Fila de req.professional.
  * @param {number} userId
  * @returns {Promise<Object>}
  */
@@ -96,9 +93,9 @@ const getDashboard = async (professional, userId) => {
     unreadNotifications: unreadCount,
   };
 };
-
 /**
- * Full professional profile.
+ * Perfil completo del profesional.
+ *
  * @param {Object} professional
  * @returns {Promise<Object>}
  */
@@ -111,7 +108,8 @@ const getProfile = async (professional) => {
 };
 
 /**
- * Updates the professional-editable profile fields (never the license).
+ * Actualiza los campos del perfil que el profesional puede editar
+ * (nunca la licencia).
  */
 const updateProfile = async (professional, data) => {
   const updated = await professionalRepository.updateProfile(professional.id, data);
@@ -121,13 +119,13 @@ const updateProfile = async (professional, data) => {
   return updated;
 };
 
-/** Lists assigned patients with search and pagination (Part 5). */
+/** Lista los pacientes asignados con búsqueda y paginación. */
 const listPatients = (professional, filters, options) =>
   professionalRepository.findAssignedPatients(professional.id, filters, options);
 
 /**
- * Full patient detail for the clinical view. Route guard already
- * verified the assignment.
+ * Detalle completo del paciente para la vista clínica.
+ * El guard de ruta ya verificó la asignación.
  * @param {number} patientId
  * @returns {Promise<Object>}
  */
@@ -140,8 +138,8 @@ const getPatientDetail = async (patientId) => {
 };
 
 /**
- * Links a patient to the caller by registered email (medical linking
- * flow, Part 5). Idempotent: re-linking reactivates the assignment.
+ * Vincula un paciente al profesional mediante correo registrado.
+ * Idempotente: revincular reactiva la asignación.
  * @param {Object} professional
  * @param {string} email
  * @returns {Promise<Object>}
@@ -170,7 +168,7 @@ const linkPatientByEmail = async (professional, email) => {
 };
 
 /**
- * Updates the assignment status (e.g. COMPLETED when care ends).
+ * Actualiza el estado de la asignación (ej. COMPLETED al finalizar la atención).
  */
 const updateAssignmentStatus = async (professional, patientId, status) => {
   const updated = await assignmentRepository.updateStatus(professional.id, patientId, status);
@@ -180,13 +178,15 @@ const updateAssignmentStatus = async (professional, patientId, status) => {
   return updated;
 };
 
-/** Lists the caller's appointments (agenda) with filters. */
+/**
+ * Lista las citas del profesional (agenda) con filtros.
+ */
 const listAppointments = (professional, filters, options) =>
   appointmentRepository.findAll({ ...filters, professionalId: professional.id }, options);
 
 /**
- * Creates an appointment for an assigned patient. Ownership is
- * re-checked here because patientId arrives in the body.
+ * Crea una cita para un paciente asignado.
+ * Revalida la propiedad porque el patientId viene en el body.
  */
 const createAppointment = async (professional, data) => {
   await assertAssigned(professional.id, data.patientId);
@@ -212,7 +212,7 @@ const createAppointment = async (professional, data) => {
 };
 
 /**
- * Loads an appointment and asserts the caller owns it.
+ * Carga una cita y valida que pertenezca al profesional.
  * @param {Object} professional
  * @param {number} appointmentId
  * @returns {Promise<Object>}
@@ -225,7 +225,9 @@ const getOwnedAppointment = async (professional, appointmentId) => {
   return appointment;
 };
 
-/** Updates an owned appointment (reschedule, complete, notes). */
+/**
+ * Actualiza una cita propia (reprogramar, completar, notas).
+ */
 const updateAppointment = async (professional, appointmentId, data) => {
   const existing = await getOwnedAppointment(professional, appointmentId);
 
@@ -250,7 +252,9 @@ const updateAppointment = async (professional, appointmentId, data) => {
   return updated;
 };
 
-/** Cancels an owned appointment with a reason. */
+/**
+ * Cancela una cita propia indicando el motivo.
+ */
 const cancelAppointment = async (professional, appointmentId, reason) => {
   const existing = await getOwnedAppointment(professional, appointmentId);
 
@@ -279,7 +283,9 @@ const cancelAppointment = async (professional, appointmentId, reason) => {
   return cancelled;
 };
 
-/** Calendar view: the caller's appointments in a month window. */
+/**
+ * Vista de calendario: citas del profesional en un rango mensual.
+ */
 const getCalendar = async (professional, year, month) => {
   const from = new Date(Date.UTC(year, month - 1, 1)).toISOString();
   const to = new Date(Date.UTC(year, month, 0, 23, 59, 59)).toISOString();
@@ -290,11 +296,15 @@ const getCalendar = async (professional, year, month) => {
   return result.rows;
 };
 
-/** Lists an assigned patient's symptoms (route guard checked the id). */
+/**
+ * Lista los síntomas de un paciente asignado (guard de ruta validado).
+ */
 const listPatientSymptoms = (patientId, filters, options) =>
   symptomRepository.findAll({ ...filters, patientId }, options);
 
-/** Lists the caller's observations, optionally per assigned patient. */
+/**
+ * Lista las observaciones del profesional, opcionalmente por paciente asignado.
+ */
 const listObservations = async (professional, filters, options) => {
   if (filters.patientId) {
     await assertAssigned(professional.id, filters.patientId);
@@ -305,7 +315,9 @@ const listObservations = async (professional, filters, options) => {
   );
 };
 
-/** Creates an observation for an assigned patient. */
+/**
+ * Crea una observación para un paciente asignado.
+ */
 const createObservation = async (professional, data) => {
   await assertAssigned(professional.id, data.patientId);
 
@@ -332,8 +344,8 @@ const createObservation = async (professional, data) => {
 };
 
 /**
- * Updates an observation. Only the authoring professional may edit
- * (Part 5) — others get 403 even if assigned to the same patient.
+ * Actualiza una observación. Solo el profesional autor puede editarla.
+ * Retorna 403 para otros, aunque estén asignados al mismo paciente.
  */
 const updateObservation = async (professional, observationId, data) => {
   const existing = await observationRepository.findDetailedById(observationId);
@@ -346,11 +358,15 @@ const updateObservation = async (professional, observationId, data) => {
   return observationRepository.update(observationId, data);
 };
 
-/** Lists the caller's treatments with filters. */
+/**
+ * Lista los tratamientos del profesional con filtros.
+ */
 const listTreatments = (professional, filters, options) =>
   treatmentRepository.findAll({ ...filters, professionalId: professional.id }, options);
 
-/** Creates a treatment for an assigned patient (body-level ownership). */
+/**
+ * Crea un tratamiento para un paciente asignado (valida asignación en el body).
+ */
 const createTreatment = async (professional, data) => {
   await assertAssigned(professional.id, data.patientId);
 
@@ -374,7 +390,9 @@ const createTreatment = async (professional, data) => {
   return treatment;
 };
 
-/** Updates an owned treatment (fields and/or status transition). */
+/**
+ * Actualiza un tratamiento propio (campos y/o cambio de estado).
+ */
 const updateTreatment = async (professional, treatmentId, data) => {
   const existing = await treatmentRepository.findDetailedById(treatmentId);
   if (!existing || existing.professional_id !== professional.id) {
@@ -400,17 +418,23 @@ const updateTreatment = async (professional, treatmentId, data) => {
   return updated;
 };
 
-/** Lists the medication catalog with optional name search. */
+/**
+ * Lista el catálogo de medicamentos con búsqueda opcional por nombre.
+ */
 const listMedicationCatalog = (search) => medicationRepository.findCatalog(search);
 
-/** Lists prescriptions written by the caller. */
+/**
+ * Lista las recetas emitidas por el profesional.
+ */
 const listPrescriptions = (professional, filters, options) =>
   medicationRepository.findPrescriptions(
     { ...filters, professionalId: professional.id },
     options
   );
 
-/** Prescribes a catalog medication to an assigned patient. */
+/**
+ * Receta un medicamento del catálogo a un paciente asignado.
+ */
 const createPrescription = async (professional, data) => {
   await assertAssigned(professional.id, data.patientId);
 
@@ -439,7 +463,9 @@ const createPrescription = async (professional, data) => {
   return prescription;
 };
 
-/** Updates an owned prescription (dosage, schedule, status). */
+/**
+ * Actualiza una receta propia (dosis, horario, estado).
+ */
 const updatePrescription = async (professional, prescriptionId, data) => {
   const existing = await medicationRepository.findPrescriptionById(prescriptionId);
   if (!existing || existing.professional_id !== professional.id) {
@@ -448,17 +474,23 @@ const updatePrescription = async (professional, prescriptionId, data) => {
   return medicationRepository.updatePrescription(prescriptionId, data);
 };
 
-/** Lists the routine catalog, optionally filtered by type. */
+/**
+ * Lista el catálogo de rutinas, opcionalmente filtrado por tipo.
+ */
 const listRoutineCatalog = (type) => routineRepository.findCatalog(type);
 
-/** Lists routine assignments made by the caller. */
+/**
+ * Lista las asignaciones de rutinas realizadas por el profesional.
+ */
 const listRoutineAssignments = (professional, filters, options) =>
   routineRepository.findAssignments(
     { ...filters, professionalId: professional.id },
     options
   );
 
-/** Assigns a catalog routine to an assigned patient. */
+/**
+ * Asigna una rutina del catálogo a un paciente asignado.
+ */
 const createRoutineAssignment = async (professional, data) => {
   await assertAssigned(professional.id, data.patientId);
 
@@ -487,7 +519,9 @@ const createRoutineAssignment = async (professional, data) => {
   return assignment;
 };
 
-/** Updates an owned routine assignment (schedule, status). */
+/**
+ * Actualiza una asignación de rutina propia (horario, estado).
+ */
 const updateRoutineAssignment = async (professional, assignmentId, data) => {
   const existing = await routineRepository.findAssignmentById(assignmentId);
   if (!existing || existing.professional_id !== professional.id) {
