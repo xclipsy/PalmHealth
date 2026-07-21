@@ -1,9 +1,10 @@
 /**
- * Patient routes — /api/patient/*
+ * Rutas de paciente — /api/patient/*
  *
- * Chain per request (Parts 3, 6): authenticateToken -> authorizeRole
- * (router perimeter) -> attachPatientProfile (ownership root) ->
- * validators -> controller.
+ * Cadena por solicitud (Partes 3 y 6):
+ * authenticateToken -> authorizeRole
+ * (perímetro del router) -> attachPatientProfile (raíz de propiedad) ->
+ * validadores -> controlador.
  */
 
 const express = require('express');
@@ -29,7 +30,7 @@ const {
 
 const router = express.Router();
 
-// Perimeter guard: valid JWT + PATIENT role + own profile attached.
+// Protección del perímetro: JWT válido + rol PATIENT + perfil propio adjunto.
 router.use(authenticateToken, authorizeRole(USER_ROLES.PATIENT), attachPatientProfile);
 
 // Dashboard
