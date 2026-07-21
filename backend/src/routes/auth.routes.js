@@ -1,10 +1,14 @@
 /**
- * Authentication routes (Part 8 of the specification).
+ * Rutas de autenticación (Parte 8 de la especificación).
  *
- * Public endpoints (register, login, logout, forgot-password) plus the
- * authenticated profile endpoint. Chain per route:
- *   validators -> handleValidationErrors -> controller
- * and for /profile: authenticateToken -> controller.
+ * Endpoints públicos (registro, inicio de sesión, cierre de sesión,
+ * recuperación de contraseña) más el endpoint de perfil autenticado.
+ *
+ * Cadena por ruta:
+ *   validadores -> handleValidationErrors -> controlador
+ *
+ * Para /profile:
+ *   authenticateToken -> controlador.
  */
 
 const express = require('express');
