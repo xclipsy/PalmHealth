@@ -13,6 +13,7 @@ const env = {
     name: process.env.DB_NAME || 'palm_health',
     user: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
+    ssl: process.env.DB_SSL === 'true' || false,
   },
   jwtSecret: process.env.JWT_SECRET || 'palm_health_jwt_secret',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
