@@ -1,11 +1,10 @@
 /**
- * Professional controller — thin HTTP layer for /api/professional/*.
+ * Controlador de profesionales — capa HTTP para /api/professional/*.
  *
- * Every handler: reads validated input, delegates to the professional
- * service and responds through sendSuccess. No business logic and no
- * SQL live here (Part 6 architecture rules).
+ * Los handlers reciben datos validados, delegan en el servicio
+ * de profesionales y responden con sendSuccess. Sin lógica de negocio
+ * ni SQL (reglas de arquitectura Parte 6).
  */
-
 const professionalService = require('../services/professional.service');
 const notificationService = require('../services/notification.service');
 const settingsService = require('../services/settings.service');
