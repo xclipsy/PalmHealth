@@ -1,15 +1,15 @@
 /**
- * Patient service — business logic for every /api/patient/* endpoint.
+ * Servicio de pacientes: contiene la lógica de negocio para todos los
+ * endpoints de /api/patient/*.
  *
- * Ownership model (Parts 3, 4): all queries are scoped to the
- * authenticated patient's own id (req.patient injected by the
- * ownership middleware). Ids from the URL are only accepted for
- * resources and then re-checked against the caller's patient id.
+ * Modelo de propiedad (Partes 3 y 4): todas las consultas están limitadas
+ * al propio ID del paciente autenticado (req.patient inyectado por el
+ * middleware de autorización). Los IDs de la URL solo se aceptan para
+ * recursos y luego se vuelven a validar contra el ID del paciente solicitante.
  *
- * Patients can WRITE only: their profile (limited fields) and their
- * symptom log. Everything else is read-only.
+ * Los pacientes solo pueden ESCRIBIR: su perfil (campos limitados) y su
+ * registro de síntomas. Todo lo demás es de solo lectura.
  */
-
 const { patientRepository } = require('../repositories/patient.repository');
 const { assignmentRepository } = require('../repositories/assignment.repository');
 const { appointmentRepository } = require('../repositories/appointment.repository');
@@ -31,10 +31,11 @@ const {
 } = require('../constants/app.constants');
 
 /**
- * Dashboard summary: next appointment, active counters, latest
- * symptoms and the assigned professional (Part 4).
- * @param {Object} patient - req.patient row.
- * @param {number} userId - users.id of the caller.
+ * Resumen del panel principal: próxima cita, contadores activos,
+ * síntomas recientes y profesional asignado (Parte 4).
+ *
+ * @param {Object} patient - Fila de req.patient.
+ * @param {number} userId - users.id del usuario solicitante.
  * @returns {Promise<Object>}
  */
 const getDashboard = async (patient, userId) => {
@@ -68,7 +69,8 @@ const getDashboard = async (patient, userId) => {
 };
 
 /**
- * Full profile including account email.
+ * Perfil completo incluyendo el correo de la cuenta.
+ *
  * @param {Object} patient
  * @returns {Promise<Object>}
  */
@@ -81,7 +83,8 @@ const getProfile = async (patient) => {
 };
 
 /**
- * Updates the patient-editable profile fields only.
+ * Actualiza únicamente los campos del perfil que el paciente puede editar.
+ *
  * @param {Object} patient
  * @param {Object} data
  * @returns {Promise<Object>}
@@ -95,18 +98,20 @@ const updateProfile = async (patient, data) => {
 };
 
 /**
- * Lists the caller's appointments with filters.
+ * Lista las citas del usuario solicitante con filtros.
+ *
  * @param {Object} patient
  * @param {Object} filters - { status, from, to }.
- * @param {Object} options - pagination + sorting.
+ * @param {Object} options - paginación y ordenamiento.
  * @returns {Promise<{ rows: Array<Object>, total: number }>}
  */
 const listAppointments = (patient, filters, options) =>
   appointmentRepository.findAll({ ...filters, patientId: patient.id }, options);
 
 /**
- * Cancels one of the caller's own scheduled appointments (patients
- * may cancel but never edit or create — Part 4).
+ * Cancela una de las citas programadas propias del paciente (los pacientes
+ * pueden cancelar, pero nunca editar ni crear citas — Parte 4).
+ *
  * @param {Object} patient
  * @param {number} appointmentId
  * @param {string} [reason]
@@ -115,7 +120,7 @@ const listAppointments = (patient, filters, options) =>
 const cancelAppointment = async (patient, appointmentId, reason) => {
   const appointment = await appointmentRepository.findDetailedById(appointmentId);
 
-  // Ownership: the appointment must belong to the caller.
+// Propiedad: la cita debe pertenecer al usuario solicitante.
   if (!appointment || appointment.patient_id !== patient.id) {
     throw new NotFoundError('La cita no existe.');
   }
@@ -129,7 +134,7 @@ const cancelAppointment = async (patient, appointmentId, reason) => {
     reason
   );
 
-  // Notify the professional (non-blocking).
+// Notifica al profesional (sin bloquear la operación).
   const professionalUser = await appointmentProfessionalUserId(appointment);
   if (professionalUser) {
     await notificationService.emit({
@@ -146,7 +151,8 @@ const cancelAppointment = async (patient, appointmentId, reason) => {
 };
 
 /**
- * Resolves the professional's user id for an appointment row.
+ * Obtiene el ID de usuario del profesional asociado a una cita.
+ *
  * @param {Object} appointment
  * @returns {Promise<number|null>}
  */
@@ -157,7 +163,8 @@ const appointmentProfessionalUserId = async (appointment) => {
 };
 
 /**
- * Calendar view: appointments inside a month window (Part 4).
+ * Vista de calendario: citas dentro de un rango mensual (Parte 4).
+ *
  * @param {Object} patient
  * @param {number} year
  * @param {number} month - 1-12.
@@ -174,13 +181,15 @@ const getCalendar = async (patient, year, month) => {
 };
 
 /**
- * Lists the caller's symptoms with filters (category, dates, intensity).
+ * Lista los síntomas del usuario solicitante con filtros
+ * (categoría, fechas e intensidad).
  */
 const listSymptoms = (patient, filters, options) =>
   symptomRepository.findAll({ ...filters, patientId: patient.id }, options);
 
 /**
- * Gets one of the caller's own symptoms.
+ * Obtiene uno de los síntomas propios del usuario solicitante.
+ *
  * @param {Object} patient
  * @param {number} symptomId
  * @returns {Promise<Object>}
@@ -194,8 +203,11 @@ const getSymptom = async (patient, symptomId) => {
 };
 
 /**
- * Registers a symptom — the core patient write operation (Part 4).
- * Notifies the assigned professional(s).
+ * Registra un síntoma: la operación principal de escritura del paciente
+ * (Parte 4).
+ *
+ * Notifica al profesional o profesionales asignados.
+ *
  * @param {Object} patient
  * @param {Object} data
  * @returns {Promise<Object>}
@@ -226,7 +238,8 @@ const createSymptom = async (patient, data) => {
 };
 
 /**
- * Updates one of the caller's own symptoms.
+ * Actualiza uno de los síntomas propios del usuario solicitante.
+ *
  * @param {Object} patient
  * @param {number} symptomId
  * @param {Object} data
@@ -246,34 +259,47 @@ const updateSymptom = async (patient, symptomId, data) => {
 };
 
 /**
- * Soft-deletes one of the caller's own symptoms.
+ * Actualiza uno de los síntomas propios del usuario solicitante.
+ *
  * @param {Object} patient
  * @param {number} symptomId
- * @returns {Promise<void>}
+ * @param {Object} data
+ * @returns {Promise<Object>}
  */
 const deleteSymptom = async (patient, symptomId) => {
   await getSymptom(patient, symptomId); // ownership + existence
   await symptomRepository.softDelete(symptomId);
 };
 
-/** Lists the symptom category catalog. */
+/**
+ * Lista el catálogo de categorías de síntomas.
+ */
 const listSymptomCategories = () => symptomRepository.findAllCategories();
 
-/** Lists the caller's treatments (read-only, filter by status). */
+/**
+ * Lista los tratamientos del usuario solicitante (solo lectura, filtrados
+ * por estado).
+ */
 const listTreatments = (patient, filters, options) =>
   treatmentRepository.findAll({ ...filters, patientId: patient.id }, options);
 
-/** Lists the caller's prescriptions (read-only, filter by status). */
+/**
+ * Lista las recetas del usuario solicitante (solo lectura, filtradas
+ * por estado).
+ */
 const listMedications = (patient, filters, options) =>
   medicationRepository.findPrescriptions({ ...filters, patientId: patient.id }, options);
 
-/** Lists the caller's routine assignments (read-only). */
+/**
+ * Lista las asignaciones de rutinas del usuario solicitante (solo lectura).
+ */
 const listRoutines = (patient, filters, options) =>
   routineRepository.findAssignments({ ...filters, patientId: patient.id }, options);
 
 /**
- * Lists observations explicitly marked visible to the patient.
- * Hidden observations are excluded at SQL level (Part 5).
+ * Lista las observaciones marcadas explícitamente como visibles para el paciente.
+ *
+ * Las observaciones ocultas se excluyen directamente a nivel de SQL (Parte 5).
  */
 const listVisibleObservations = (patient, options) =>
   observationRepository.findAll(
@@ -281,7 +307,9 @@ const listVisibleObservations = (patient, options) =>
     options
   );
 
-/** Lists the professional(s) currently assigned to the caller. */
+/**
+ * Lista los profesionales actualmente asignados al usuario solicitante.
+ */
 const getAssignedProfessionals = (patient) =>
   assignmentRepository.findActiveProfessionalsForPatient(patient.id);
 
