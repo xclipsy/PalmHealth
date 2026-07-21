@@ -1,6 +1,8 @@
 /**
- * Notification repository — owns all SQL against the notifications
- * table. Notifications are strictly scoped to their owner user.
+ * Repositorio de notificaciones: gestiona todo el SQL de la tabla
+ * notifications.
+ *
+ * Las notificaciones pertenecen únicamente a su usuario propietario.
  */
 
 const { BaseRepository } = require('./base.repository');
@@ -10,13 +12,14 @@ class NotificationRepository extends BaseRepository {
     super('notifications');
   }
 
-  /**
-   * Lists notifications for one user with read-status filter.
-   * @param {number} userId
-   * @param {Object} filters - { isRead }.
-   * @param {Object} options - { limit, offset }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+ /**
+ * Lista notificaciones de un usuario con filtro de estado de lectura.
+ *
+ * @param {number} userId
+ * @param {Object} filters - { isRead }.
+ * @param {Object} options - { limit, offset }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findByUser(userId, filters, { limit, offset }) {
     const conditions = ['deleted_at IS NULL', 'user_id = $1'];
     const params = [userId];
@@ -44,19 +47,21 @@ class NotificationRepository extends BaseRepository {
   }
 
   /**
-   * Counts unread notifications for one user (dashboard widget).
-   * @param {number} userId
-   * @returns {Promise<number>}
-   */
+ * Cuenta notificaciones no leídas de un usuario (widget del panel).
+ *
+ * @param {number} userId
+ * @returns {Promise<number>}
+ */
   async countUnread(userId) {
     return this.count('AND user_id = $1 AND is_read = FALSE', [userId]);
   }
 
-  /**
-   * Creates a notification for a user.
-   * @param {Object} data
-   * @returns {Promise<Object>}
-   */
+ /**
+ * Crea una notificación para un usuario.
+ *
+ * @param {Object} data
+ * @returns {Promise<Object>}
+ */
   async create(data) {
     const result = await this.execute(
       `INSERT INTO notifications
@@ -75,12 +80,13 @@ class NotificationRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  /**
-   * Marks one notification as read — only if it belongs to the user.
-   * @param {number} id
-   * @param {number} userId
-   * @returns {Promise<Object|null>}
-   */
+/**
+ * Marca una notificación como leída solo si pertenece al usuario.
+ *
+ * @param {number} id
+ * @param {number} userId
+ * @returns {Promise<Object|null>}
+ */
   async markAsRead(id, userId) {
     const result = await this.execute(
       `UPDATE notifications
@@ -93,11 +99,12 @@ class NotificationRepository extends BaseRepository {
   }
 
   /**
-   * Soft-deletes one notification — only if it belongs to the user.
-   * @param {number} id
-   * @param {number} userId
-   * @returns {Promise<boolean>}
-   */
+ * Realiza borrado lógico de una notificación solo si pertenece al usuario.
+ *
+ * @param {number} id
+ * @param {number} userId
+ * @returns {Promise<boolean>}
+ */
   async softDeleteForUser(id, userId) {
     const result = await this.execute(
       `UPDATE notifications
