@@ -1,15 +1,14 @@
 /**
- * Environment configuration.
+ * Configuración del entorno.
  *
- * Single source of truth for every environment variable used by the
- * backend. No other module reads process.env directly — this keeps
- * configuration auditable and makes missing variables fail fast.
+ * Centraliza todas las variables de entorno del backend.
+ * Evita accesos directos a process.env y detecta faltantes rápidamente.
  */
 
 const path = require('path');
 const dotenv = require('dotenv');
 
-// Load .env from the backend root.
+// Carga el archivo .env desde la raíz del backend.
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 const env = {
@@ -17,10 +16,11 @@ const env = {
   port: Number(process.env.PORT) || 3000,
 
   /**
-   * Local PostgreSQL connection parameters.
-   * Discrete DB_* variables per project configuration (no cloud
-   * provider, no connection-string coupling).
-   */
+ * Parámetros de conexión local a PostgreSQL.
+ *
+ * Usa variables DB_* independientes, sin depender de proveedores
+ * externos ni cadenas de conexión.
+ */
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT) || 5432,
@@ -29,17 +29,23 @@ const env = {
     password: process.env.DB_PASSWORD || 'postgres',
   },
 
-  /**
-   * JWT configuration (Part 3 of the specification).
-   * Secret must never be hardcoded; expiration defaults to 24h.
-   */
+/**
+ * Configuración JWT.
+ *
+ * El secreto nunca debe estar definido en código.
+ * La expiración predeterminada es de 24 horas.
+ */
   jwtSecret: process.env.JWT_SECRET || '',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '24h',
 
-  /** bcrypt cost factor. 12 is the recommended baseline for the MVP. */
+/**
+ * Factor de costo de bcrypt.
+ *
+ * 12 es el valor recomendado para el MVP.
+ */
   bcryptSaltRounds: Number(process.env.BCRYPT_SALT_ROUNDS) || 12,
 
-  /** Allowed CORS origin for the SPA. */
+  /** Origen CORS permitido para la SPA. */
   corsOrigin: process.env.CORS_ORIGIN || '*',
 };
 
