@@ -1,14 +1,18 @@
 /**
- * Async controller wrapper.
+ * Wrapper para controladores asíncronos.
  *
- * Express 4 does not forward rejected promises to the error middleware
- * automatically. Every async controller is wrapped with this helper so
- * thrown AppErrors (and unexpected errors) always reach the global
- * error handler — no try/catch boilerplate inside controllers.
+ * Express 4 no reenvía promesas rechazadas al middleware de errores de forma
+ * automática. Este helper envuelve cada controlador asíncrono para que los
+ * AppErrors (y errores inesperados) lleguen siempre al manejador global,
+ * eliminando el bloque try/catch en los controladores.
  */
 
 /**
- * Wraps an async request handler and pipes rejections to next().
+ * Envuelve un manejador de peticiones asíncrono y reenvía las promesas rechazadas a next().
+ */
+
+/**
+ * Envuelve un manejador de peticiones asíncrono y reenvía las promesas rechazadas a next().
  *
  * @param {(req: import('express').Request, res: import('express').Response, next: import('express').NextFunction) => Promise<*>} handler
  * @returns {import('express').RequestHandler}
