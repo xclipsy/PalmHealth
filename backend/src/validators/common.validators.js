@@ -1,7 +1,10 @@
 /**
- * Validation chains shared by patient and professional modules:
- * id params, pagination/sorting queries, date filters, notifications
- * and settings. Every message is user-facing Spanish.
+ * Cadenas de validación compartidas por los módulos de pacientes y
+ * profesionales:
+ * parámetros de ID, consultas de paginación/ordenamiento, filtros de
+ * fecha, notificaciones y configuraciones.
+ *
+ * Todos los mensajes son visibles para el usuario y están en español.
  */
 
 const { param, query, body } = require('express-validator');
