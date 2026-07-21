@@ -1,11 +1,13 @@
 /**
- * API route aggregator.
+ * Agregador de rutas API.
  *
- * Mounts every domain router under the /api base path (see app.js).
- * Domain routers are placeholders until their modules are implemented:
- *   - Module 4: auth.routes.js
- *   - Module 8: patient.routes.js
- *   - Module 9: professional.routes.js
+ * Monta cada router de dominio bajo la ruta base /api (ver app.js).
+ *
+ * Los routers de dominio son marcadores hasta que sus módulos sean
+ * implementados:
+ *   - Módulo 4: auth.routes.js
+ *   - Módulo 8: patient.routes.js
+ *   - Módulo 9: professional.routes.js
  */
 
 const express = require('express');
@@ -16,10 +18,11 @@ const professionalRoutes = require('./professional.routes');
 const healthController = require('../controllers/health.controller');
 
 const router = express.Router();
-
 /**
- * Health check endpoint — reports API and database status.
- * Useful for uptime probes and smoke tests.
+ * Endpoint de comprobación de estado (health check): informa el estado
+ * de la API y la base de datos.
+ *
+ * Útil para verificaciones de disponibilidad y pruebas rápidas.
  */
 router.get('/health', healthController.getHealth);
 
