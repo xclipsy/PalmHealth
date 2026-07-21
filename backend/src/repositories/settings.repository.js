@@ -1,6 +1,8 @@
 /**
- * Settings repository — owns all SQL against the settings table.
- * One row per user; created lazily with defaults on first read.
+ * Repositorio de configuración: gestiona todo el SQL de la tabla settings.
+ *
+ * Existe un registro por usuario; se crea automáticamente con valores
+ * predeterminados en la primera consulta.
  */
 
 const { BaseRepository } = require('./base.repository');
@@ -10,12 +12,14 @@ class SettingsRepository extends BaseRepository {
     super('settings');
   }
 
-  /**
-   * Finds the settings row for a user, creating it with defaults when
-   * missing (upsert keeps the endpoint idempotent and race-safe).
-   * @param {number} userId
-   * @returns {Promise<Object>}
-   */
+ /**
+ * Busca la configuración de un usuario y la crea con valores
+ * predeterminados si no existe (upsert mantiene el endpoint idempotente
+ * y seguro ante condiciones de carrera).
+ *
+ * @param {number} userId
+ * @returns {Promise<Object>}
+ */
   async findOrCreateByUserId(userId) {
     const result = await this.execute(
       `INSERT INTO settings (user_id)
@@ -27,12 +31,13 @@ class SettingsRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  /**
-   * Updates a user's settings.
-   * @param {number} userId
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+ /**
+ * Actualiza la configuración de un usuario.
+ *
+ * @param {number} userId
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async updateByUserId(userId, data) {
     const result = await this.execute(
       `UPDATE settings
