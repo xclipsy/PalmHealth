@@ -1,10 +1,10 @@
 /**
- * Assignment repository — owns all SQL against
+ * Repositorio de asignaciones: gestiona todo el SQL de
  * patient_professional_assignments.
  *
- * This table is the source of truth for ownership authorization:
- * a professional may only touch data of patients with an ACTIVE
- * assignment (Parts 3 and 5 of the specification).
+ * Esta tabla define la autorización por propiedad:
+ * un profesional solo accede a pacientes con asignación ACTIVA
+ * (Partes 3 y 5 de la especificación).
  */
 
 const { BaseRepository } = require('./base.repository');
@@ -16,13 +16,14 @@ class AssignmentRepository extends BaseRepository {
   }
 
   /**
-   * Ownership check: is this professional actively assigned to this
-   * patient? Used by the authorization layer before any clinical
-   * resource of the patient is exposed.
-   * @param {number} professionalId - professionals.id
-   * @param {number} patientId - patients.id
-   * @returns {Promise<boolean>}
-   */
+ * Verifica propiedad: si el profesional tiene asignación ACTIVA con el paciente.
+ *
+ * Usado por autorización antes de exponer recursos clínicos.
+ *
+ * @param {number} professionalId - professionals.id
+ * @param {number} patientId - patients.id
+ * @returns {Promise<boolean>}
+ */
   async isProfessionalAssignedToPatient(professionalId, patientId) {
     const result = await this.execute(
       `SELECT 1
@@ -38,11 +39,12 @@ class AssignmentRepository extends BaseRepository {
   }
 
   /**
-   * Finds the professional(s) actively assigned to a patient
-   * (patient's "my professional" view, Part 4).
-   * @param {number} patientId
-   * @returns {Promise<Array<Object>>}
-   */
+ * Busca profesionales con asignación ACTIVA a un paciente
+ * (vista "mi profesional" del paciente, Parte 4).
+ *
+ * @param {number} patientId
+ * @returns {Promise<Array<Object>>}
+ */
   async findActiveProfessionalsForPatient(patientId) {
     const result = await this.execute(
       `SELECT pr.id, pr.user_id, pr.first_name, pr.last_name, pr.specialty,
@@ -60,13 +62,15 @@ class AssignmentRepository extends BaseRepository {
   }
 
   /**
-   * Creates or reactivates the assignment between a professional and
-   * a patient (medical linking flow, Part 5). The UNIQUE pair
-   * constraint makes this an idempotent upsert.
-   * @param {number} professionalId
-   * @param {number} patientId
-   * @returns {Promise<Object>}
-   */
+ * Crea o reactiva la asignación entre profesional y paciente
+ * (flujo de vinculación médica, Parte 5).
+ *
+ * La restricción UNIQUE permite un upsert idempotente.
+ *
+ * @param {number} professionalId
+ * @param {number} patientId
+ * @returns {Promise<Object>}
+ */
   async createOrReactivate(professionalId, patientId) {
     const result = await this.execute(
       `INSERT INTO patient_professional_assignments
@@ -82,12 +86,13 @@ class AssignmentRepository extends BaseRepository {
   }
 
   /**
-   * Updates the status of an assignment owned by the professional.
-   * @param {number} professionalId
-   * @param {number} patientId
-   * @param {string} status - ASSIGNMENT_STATUS value.
-   * @returns {Promise<Object|null>}
-   */
+ * Actualiza el estado de una asignación del profesional.
+ *
+ * @param {number} professionalId
+ * @param {number} patientId
+ * @param {string} status - Valor de ASSIGNMENT_STATUS.
+ * @returns {Promise<Object|null>}
+ */
   async updateStatus(professionalId, patientId, status) {
     const result = await this.execute(
       `UPDATE patient_professional_assignments
