@@ -1,17 +1,17 @@
 /**
- * HTTP status code constants (Part 8 of the specification).
+ * Constantes de códigos HTTP (Parte 8).
  *
- * Every status code used by the API is declared here so controllers,
- * error classes and middlewares never hardcode numeric values.
+ * Centraliza los códigos usados por la API para evitar valores
+ * numéricos repetidos en controladores, errores y middlewares.
  */
 
 const HTTP_STATUS = Object.freeze({
-  // Success
+ // Éxito
   OK: 200,
   CREATED: 201,
   NO_CONTENT: 204,
 
-  // Client errors
+  // Errores del cliente
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
@@ -19,7 +19,7 @@ const HTTP_STATUS = Object.freeze({
   CONFLICT: 409,
   UNPROCESSABLE_ENTITY: 422,
 
-  // Server errors
+  // Errores del servidor
   INTERNAL_SERVER_ERROR: 500,
 });
 
