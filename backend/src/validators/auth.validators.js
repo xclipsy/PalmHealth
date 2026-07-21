@@ -1,22 +1,27 @@
 /**
- * Authentication request validators (Part 3 of the specification).
+ * Validadores de solicitudes de autenticación (Parte 3 de la especificación).
  *
- * express-validator chains executed before controllers. Every message
- * is user-facing Spanish. Password policy: minimum 8 characters with
- * at least one uppercase, one lowercase, one number and one special
- * character.
+ * Cadenas de express-validator ejecutadas antes de los controladores.
+ * Todos los mensajes son visibles para el usuario y están en español.
+ *
+ * Política de contraseñas: mínimo 8 caracteres con al menos una letra
+ * mayúscula, una letra minúscula, un número y un carácter especial.
  */
 
 const { body } = require('express-validator');
 const { handleValidationErrors } = require('../middlewares/validation.middleware');
 
-/** Password policy shared by both registration flows. */
+/**
+ * Política de contraseñas compartida por ambos flujos de registro.
+ */
 const PASSWORD_MIN_LENGTH = 8;
 const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
 const PASSWORD_MESSAGE =
   'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.';
 
-/** Reusable email chain. */
+/**
+ * Cadena reutilizable para validación de correo electrónico.
+ */
 const emailChain = () =>
   body('email')
     .trim()
