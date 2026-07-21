@@ -1,7 +1,9 @@
 /**
- * Professional repository — owns all SQL against the professionals table.
- * Module 4 scope: creation during registration, license uniqueness
- * check and profile lookup.
+ * Repositorio de profesionales: gestiona todo el SQL de la tabla
+ * professionals.
+ *
+ * Alcance del Módulo 4: creación durante el registro, verificación de
+ * licencia única y consulta de perfil.
  */
 
 const { BaseRepository } = require('./base.repository');
@@ -12,10 +14,11 @@ class ProfessionalRepository extends BaseRepository {
   }
 
   /**
-   * Checks whether a medical license number is already registered.
-   * @param {string} licenseNumber
-   * @returns {Promise<boolean>}
-   */
+ * Verifica si un número de licencia médica ya está registrado.
+ *
+ * @param {string} licenseNumber
+ * @returns {Promise<boolean>}
+ */
   async licenseExists(licenseNumber) {
     const result = await this.execute(
       'SELECT 1 FROM professionals WHERE license_number = $1 LIMIT 1',
@@ -24,13 +27,14 @@ class ProfessionalRepository extends BaseRepository {
     return result.rowCount > 0;
   }
 
-  /**
-   * Inserts the professional profile inside an existing transaction
-   * client (registration creates users + professionals atomically).
-   * @param {import('pg').PoolClient} client - Transaction client.
-   * @param {Object} data - Professional profile fields.
-   * @returns {Promise<Object>} The created row.
-   */
+/**
+ * Inserta el perfil del profesional dentro de una transacción existente
+ * (el registro crea users + professionals de forma atómica).
+ *
+ * @param {import('pg').PoolClient} client - Cliente de transacción.
+ * @param {Object} data - Campos del perfil del profesional.
+ * @returns {Promise<Object>} Registro creado.
+ */
   async createWithClient(client, data) {
     const result = await client.query(
       `INSERT INTO professionals
@@ -51,12 +55,12 @@ class ProfessionalRepository extends BaseRepository {
     );
     return result.rows[0];
   }
-
-  /**
-   * Finds the professional profile linked to a user account.
-   * @param {number} userId
-   * @returns {Promise<Object|null>}
-   */
+/**
+ * Busca el perfil del profesional asociado a una cuenta de usuario.
+ *
+ * @param {number} userId
+ * @returns {Promise<Object|null>}
+ */
   async findByUserId(userId) {
     const result = await this.execute(
       'SELECT * FROM professionals WHERE user_id = $1 AND deleted_at IS NULL',
@@ -66,12 +70,15 @@ class ProfessionalRepository extends BaseRepository {
   }
 
   /**
-   * Updates the professional-editable profile fields (Part 5: phone,
-   * clinic, experience — never the medical license number).
-   * @param {number} id - professionals.id
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+ * Actualiza campos editables del perfil del profesional (Parte 5):
+ * teléfono, clínica y experiencia.
+ *
+ * Nunca modifica el número de licencia médica.
+ *
+ * @param {number} id - professionals.id
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async updateProfile(id, data) {
     const result = await this.execute(
       `UPDATE professionals
@@ -93,14 +100,16 @@ class ProfessionalRepository extends BaseRepository {
     return result.rows[0] || null;
   }
 
-  /**
-   * Lists patients actively assigned to a professional, with optional
-   * case-insensitive search over name, email and phone (Part 5).
-   * @param {number} professionalId
-   * @param {Object} filters - { search, status (assignment status) }.
-   * @param {Object} options - { limit, offset }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+ /**
+ * Lista pacientes con asignación ACTIVA a un profesional, con búsqueda
+ * opcional sin distinguir mayúsculas/minúsculas en nombre, correo y
+ * teléfono (Parte 5).
+ *
+ * @param {number} professionalId
+ * @param {Object} filters - { search, status (estado de asignación) }.
+ * @param {Object} options - { limit, offset }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findAssignedPatients(professionalId, filters, { limit, offset }) {
     const conditions = [
       'ppa.professional_id = $1',
