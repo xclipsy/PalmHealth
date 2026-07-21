@@ -1,7 +1,9 @@
 /**
- * Symptom repository — owns all SQL against symptoms and
- * symptom_categories. Symptoms are the only clinical entity a patient
- * can write (Part 4).
+ * Repositorio de síntomas: gestiona todo el SQL de symptoms y
+ * symptom_categories.
+ *
+ * Los síntomas son la única entidad clínica que el paciente puede crear
+ * (Parte 4).
  */
 
 const { BaseRepository } = require('./base.repository');
@@ -23,11 +25,12 @@ class SymptomRepository extends BaseRepository {
     super('symptoms');
   }
 
-  /**
-   * Builds shared WHERE fragment + params for list/count.
-   * @param {Object} filters
-   * @returns {{ where: string, params: Array<*> }}
-   */
+ /**
+ * Construye el fragmento WHERE y parámetros compartidos para listar y contar.
+ *
+ * @param {Object} filters
+ * @returns {{ where: string, params: Array<*> }}
+ */
   buildFilters(filters) {
     const conditions = ['s.deleted_at IS NULL'];
     const params = [];
@@ -57,11 +60,12 @@ class SymptomRepository extends BaseRepository {
   }
 
   /**
-   * Lists symptoms with filters, sorting and pagination.
-   * @param {Object} filters
-   * @param {Object} options - { limit, offset, sort, order }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+ * Lista síntomas con filtros, ordenamiento y paginación.
+ *
+ * @param {Object} filters
+ * @param {Object} options - { limit, offset, sort, order }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findAll(filters, { limit, offset, sort = 'occurred_at', order = 'desc' }) {
     const { where, params } = this.buildFilters(filters);
     const sortColumn = SORTABLE_COLUMNS[sort] || SORTABLE_COLUMNS.occurred_at;
@@ -83,10 +87,11 @@ class SymptomRepository extends BaseRepository {
   }
 
   /**
-   * Finds one symptom (with category name) by id.
-   * @param {number} id
-   * @returns {Promise<Object|null>}
-   */
+ * Busca un síntoma por ID incluyendo el nombre de la categoría.
+ *
+ * @param {number} id
+ * @returns {Promise<Object|null>}
+ */
   async findDetailedById(id) {
     const result = await this.execute(
       `${BASE_SELECT} WHERE s.id = $1 AND s.deleted_at IS NULL`,
@@ -94,12 +99,12 @@ class SymptomRepository extends BaseRepository {
     );
     return result.rows[0] || null;
   }
-
-  /**
-   * Creates a symptom entry.
-   * @param {Object} data
-   * @returns {Promise<Object>}
-   */
+/**
+ * Crea un registro de síntoma.
+ *
+ * @param {Object} data
+ * @returns {Promise<Object>}
+ */
   async create(data) {
     const result = await this.execute(
       `INSERT INTO symptoms
@@ -120,12 +125,13 @@ class SymptomRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  /**
-   * Updates a symptom entry.
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+/**
+ * Actualiza un registro de síntoma.
+ *
+ * @param {number} id
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async update(id, data) {
     const result = await this.execute(
       `UPDATE symptoms
@@ -139,9 +145,13 @@ class SymptomRepository extends BaseRepository {
         WHERE id = $1 AND deleted_at IS NULL
         RETURNING *`,
       [
-        /* `|| null` filters empty strings: Postgres rejects '' as a
-           timestamp, and COALESCE keeps the current value on null.
-           `intensity` keeps ?? because 0 must not be swallowed. */
+        /*
+ * `|| null` filtra cadenas vacías: PostgreSQL rechaza '' en timestamps
+ * y COALESCE mantiene el valor actual cuando recibe null.
+ *
+ * `intensity` mantiene `??` porque el valor 0 es válido y no debe
+ * reemplazarse.
+ */
         id,
         data.categoryId || null,
         data.intensity ?? null,
@@ -155,9 +165,10 @@ class SymptomRepository extends BaseRepository {
   }
 
   /**
-   * Lists all active symptom categories (catalog).
-   * @returns {Promise<Array<Object>>}
-   */
+ * Lista todas las categorías de síntomas activas (catálogo).
+ *
+ * @returns {Promise<Array<Object>>}
+ */
   async findAllCategories() {
     const result = await this.execute(
       `SELECT id, name, description
@@ -168,11 +179,13 @@ class SymptomRepository extends BaseRepository {
     return result.rows;
   }
 
-  /**
-   * Checks a category exists (validators use this for 422 messages).
-   * @param {number} categoryId
-   * @returns {Promise<boolean>}
-   */
+/**
+ * Verifica que una categoría exista (los validadores lo usan para
+ * generar mensajes 422).
+ *
+ * @param {number} categoryId
+ * @returns {Promise<boolean>}
+ */
   async categoryExists(categoryId) {
     const result = await this.execute(
       'SELECT 1 FROM symptom_categories WHERE id = $1 AND deleted_at IS NULL',
