@@ -1,8 +1,8 @@
 /**
- * Professional module validators — every /api/professional/* write
- * and filtered list runs one of these chains before its controller.
+ * Validadores del módulo de profesionales: cada operación de escritura
+ * en /api/professional/* y cada listado con filtros ejecuta una de estas
+ * cadenas antes de llegar al controlador.
  */
-
 const { body, query } = require('express-validator');
 const { handleValidationErrors } = require('../middlewares/validation.middleware');
 const {
@@ -96,8 +96,11 @@ const listAppointmentsValidator = [
 ];
 
 /**
- * Required-on-create / immutable-on-update patient id body chain.
- * Update validators simply omit it (the owning patient never changes).
+ * Cadena de validación para patientId en el cuerpo: obligatorio al crear
+ * e inmutable al actualizar.
+ *
+ * Los validadores de actualización simplemente lo omiten (el paciente
+ * propietario nunca cambia).
  */
 const patientIdBodyChain = () =>
   body('patientId')
@@ -107,8 +110,9 @@ const patientIdBodyChain = () =>
     .withMessage('El paciente no es válido.');
 
 /**
- * Marks a chain as required (with a Spanish message) on create, or
- * optional on update. Keeps subsequent validators intact.
+ * Marca una cadena como obligatoria (con un mensaje en español) al crear,
+ * u opcional al actualizar. Mantiene intactos los validadores posteriores.
+ *
  * @param {import('express-validator').ValidationChain} chain
  * @param {boolean} isCreate
  * @param {string} requiredMessage
