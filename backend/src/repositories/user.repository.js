@@ -1,27 +1,32 @@
 /**
- * User repository — owns all SQL against the users table.
+ * Repositorio de usuarios: gestiona todo el SQL de la tabla users.
  *
- * The password_hash column is only returned by findByEmailWithPassword
- * (needed for login comparison); every other query excludes it so
- * hashes never travel further than the auth service.
+ * La columna password_hash solo se devuelve mediante findByEmailWithPassword
+ * (necesaria para comparar credenciales durante el inicio de sesión);
+ * cualquier otra consulta la excluye para evitar que los hashes lleguen
+ * más allá del servicio de autenticación.
  */
 
 const { BaseRepository } = require('./base.repository');
 
-/** Columns safe to expose outside the repository (no password_hash). */
+/**
+ * Columnas seguras para exponer fuera del repositorio (sin password_hash).
+ */
 const SAFE_COLUMNS = 'id, email, role, status, created_at, updated_at';
 
 class UserRepository extends BaseRepository {
   constructor() {
     super('users');
   }
-
-  /**
-   * Finds an active-or-not user by email including the password hash.
-   * Used exclusively by the login flow for bcrypt comparison.
-   * @param {string} email - Normalized (lowercased) email.
-   * @returns {Promise<Object|null>}
-   */
+/**
+ * Busca un usuario activo o no por correo incluyendo el hash de contraseña.
+ *
+ * Se usa exclusivamente en el flujo de inicio de sesión para la
+ * comparación con bcrypt.
+ *
+ * @param {string} email - Correo normalizado (en minúsculas).
+ * @returns {Promise<Object|null>}
+ */
   async findByEmailWithPassword(email) {
     const result = await this.execute(
       `SELECT id, email, password_hash, role, status
@@ -33,11 +38,12 @@ class UserRepository extends BaseRepository {
   }
 
   /**
-   * Checks whether an email is already registered (soft-deleted rows
-   * still count — emails are never recycled).
-   * @param {string} email - Normalized email.
-   * @returns {Promise<boolean>}
-   */
+ * Verifica si un correo ya está registrado (los registros eliminados
+ * lógicamente también cuentan; los correos nunca se reutilizan).
+ *
+ * @param {string} email - Correo normalizado.
+ * @returns {Promise<boolean>}
+ */
   async emailExists(email) {
     const result = await this.execute(
       'SELECT 1 FROM users WHERE email = $1 LIMIT 1',
@@ -45,13 +51,13 @@ class UserRepository extends BaseRepository {
     );
     return result.rowCount > 0;
   }
-
-  /**
-   * Inserts a new user inside an existing transaction client.
-   * @param {import('pg').PoolClient} client - Transaction client.
-   * @param {{ email: string, passwordHash: string, role: string }} data
-   * @returns {Promise<Object>} The created row (safe columns only).
-   */
+/**
+ * Inserta un nuevo usuario dentro de un cliente de transacción existente.
+ *
+ * @param {import('pg').PoolClient} client - Cliente de transacción.
+ * @param {{ email: string, passwordHash: string, role: string }} data
+ * @returns {Promise<Object>} La fila creada (solo columnas seguras).
+ */
   async createWithClient(client, { email, passwordHash, role }) {
     const result = await client.query(
       `INSERT INTO users (email, password_hash, role)
@@ -63,10 +69,11 @@ class UserRepository extends BaseRepository {
   }
 
   /**
-   * Finds a user by id without the password hash.
-   * @param {number} id
-   * @returns {Promise<Object|null>}
-   */
+ * Busca un usuario por ID sin incluir el hash de contraseña.
+ *
+ * @param {number} id
+ * @returns {Promise<Object|null>}
+ */
   async findSafeById(id) {
     const result = await this.execute(
       `SELECT ${SAFE_COLUMNS} FROM users WHERE id = $1 AND deleted_at IS NULL`,
