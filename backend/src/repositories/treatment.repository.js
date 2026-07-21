@@ -1,7 +1,8 @@
 /**
- * Treatment repository — owns all SQL against the treatments table.
- * Treatments are created and managed by professionals; patients only
- * read them (Parts 4, 5).
+ * Repositorio de tratamientos: gestiona todo el SQL de la tabla treatments.
+ *
+ * Los tratamientos son creados y administrados por profesionales; los
+ * pacientes únicamente pueden consultarlos (Partes 4 y 5).
  */
 
 const { BaseRepository } = require('./base.repository');
@@ -29,10 +30,12 @@ class TreatmentRepository extends BaseRepository {
   }
 
   /**
-   * Builds shared WHERE fragment + params for list/count.
-   * @param {Object} filters
-   * @returns {{ where: string, params: Array<*> }}
-   */
+ * Construye el fragmento WHERE y los parámetros compartidos para
+ * listar y contar.
+ *
+ * @param {Object} filters
+ * @returns {{ where: string, params: Array<*> }}
+ */
   buildFilters(filters) {
     const conditions = ['t.deleted_at IS NULL'];
     const params = [];
@@ -54,11 +57,12 @@ class TreatmentRepository extends BaseRepository {
   }
 
   /**
-   * Lists treatments with filters, sorting and pagination.
-   * @param {Object} filters
-   * @param {Object} options - { limit, offset, sort, order }.
-   * @returns {Promise<{ rows: Array<Object>, total: number }>}
-   */
+ * Lista tratamientos con filtros, ordenamiento y paginación.
+ *
+ * @param {Object} filters
+ * @param {Object} options - { limit, offset, sort, order }.
+ * @returns {Promise<{ rows: Array<Object>, total: number }>}
+ */
   async findAll(filters, { limit, offset, sort = 'created_at', order = 'desc' }) {
     const { where, params } = this.buildFilters(filters);
     const sortColumn = SORTABLE_COLUMNS[sort] || SORTABLE_COLUMNS.created_at;
@@ -79,11 +83,12 @@ class TreatmentRepository extends BaseRepository {
     return { rows: listResult.rows, total: countResult.rows[0].total };
   }
 
-  /**
-   * Finds one treatment (with names) by id.
-   * @param {number} id
-   * @returns {Promise<Object|null>}
-   */
+ /**
+ * Busca un tratamiento por ID incluyendo nombres relacionados.
+ *
+ * @param {number} id
+ * @returns {Promise<Object|null>}
+ */
   async findDetailedById(id) {
     const result = await this.execute(
       `${BASE_SELECT} WHERE t.id = $1 AND t.deleted_at IS NULL`,
@@ -92,11 +97,12 @@ class TreatmentRepository extends BaseRepository {
     return result.rows[0] || null;
   }
 
-  /**
-   * Creates a treatment.
-   * @param {Object} data
-   * @returns {Promise<Object>}
-   */
+/**
+ * Crea un tratamiento.
+ *
+ * @param {Object} data
+ * @returns {Promise<Object>}
+ */
   async create(data) {
     const result = await this.execute(
       `INSERT INTO treatments
@@ -117,12 +123,13 @@ class TreatmentRepository extends BaseRepository {
     return result.rows[0];
   }
 
-  /**
-   * Updates a treatment (fields and/or status).
-   * @param {number} id
-   * @param {Object} data
-   * @returns {Promise<Object|null>}
-   */
+ /**
+ * Actualiza un tratamiento (campos o estado).
+ *
+ * @param {number} id
+ * @param {Object} data
+ * @returns {Promise<Object|null>}
+ */
   async update(id, data) {
     const result = await this.execute(
       `UPDATE treatments
@@ -136,8 +143,10 @@ class TreatmentRepository extends BaseRepository {
         WHERE id = $1 AND deleted_at IS NULL
         RETURNING *`,
       [
-        /* `|| null` filters empty strings: Postgres rejects '' as a date,
-           and COALESCE keeps the current value when null is passed. */
+        /*
+ * `|| null` filtra cadenas vacías: PostgreSQL rechaza '' en fechas
+ * y COALESCE mantiene el valor actual cuando recibe null.
+ */
         id,
         data.title || null,
         data.description || null,
