@@ -1,26 +1,26 @@
 /**
- * Settings service — per-user preferences (both roles share it: the
- * settings row is keyed by user, not by role profile).
+ * Servicio de configuración: preferencias por usuario.
+ * Compartido por ambos roles (la clave es el usuario, no el perfil de rol).
  */
 
 const { settingsRepository } = require('../repositories/settings.repository');
 const { NotFoundError } = require('../errors/app.errors');
 
 /**
- * Gets the caller's settings, creating defaults on first access.
+ * Obtiene la configuración del usuario, creando valores por defecto al primer acceso.
  * @param {number} userId
  * @returns {Promise<Object>}
  */
 const getForUser = (userId) => settingsRepository.findOrCreateByUserId(userId);
 
 /**
- * Updates the caller's settings.
+ * Actualiza la configuración del usuario.
  * @param {number} userId
  * @param {Object} data
  * @returns {Promise<Object>}
  */
 const updateForUser = async (userId, data) => {
-  // Ensure the row exists before updating (first-time writers).
+ // Asegura que el registro exista antes de actualizar (creación en primer acceso).
   await settingsRepository.findOrCreateByUserId(userId);
   const updated = await settingsRepository.updateByUserId(userId, data);
   if (!updated) {
