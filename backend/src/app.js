@@ -1,14 +1,14 @@
 /**
- * Express application configuration.
+ * Configuración de la aplicación Express.
  *
- * Responsibility: assemble the middleware pipeline, mount API routes,
- * serve the SPA frontend and register error handling. No business logic
- * lives here — that belongs to services (see /src/services).
+ * Responsabilidad: ensamblar el flujo de middlewares, montar las rutas
+ * de la API, servir el frontend SPA y registrar el manejo de errores.
+ * No contiene lógica de negocio; esta pertenece a los servicios
+ * (ver /src/services).
  *
- * Request flow (Part 6 of the specification):
- *   Router -> Middlewares -> Validators -> Controller -> Service -> Repository -> PostgreSQL
+ * Flujo de solicitudes (Parte 6 de la especificación):
+ *   Router -> Middlewares -> Validadores -> Controlador -> Servicio -> Repositorio -> PostgreSQL
  */
-
 const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
@@ -23,12 +23,12 @@ const { notFoundHandler, errorHandler } = require('./middlewares/error.middlewar
 const app = express();
 
 /* ------------------------------------------------------------------ */
-/* Security and utility middlewares                                    */
+/* Middlewares de seguridad y utilidades                              */
 /* ------------------------------------------------------------------ */
 
-// Helmet sets security-related HTTP headers.
-// contentSecurityPolicy is kept permissive for the MVP because the SPA
-// loads Google Fonts and inline Tailwind-generated styles.
+// Helmet configura encabezados HTTP relacionados con la seguridad.
+// contentSecurityPolicy se mantiene permisivo para el MVP porque la SPA
+// carga Google Fonts y estilos inline generados por Tailwind.
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -40,24 +40,30 @@ app.use(compression());
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging. 'dev' format in development, 'combined' in production.
-// Morgan never logs request bodies, so no medical data reaches the logs.
+/**
+ * Registro de solicitudes. Formato 'dev' en desarrollo y 'combined'
+ * en producción.
+ *
+ * Morgan nunca registra los cuerpos de las solicitudes, por lo que los
+ * datos médicos no llegan a los logs.
+ */
 app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 
 /* ------------------------------------------------------------------ */
-/* API routes                                                          */
+/* Rutas de la API                                                     */
 /* ------------------------------------------------------------------ */
 
-// Base path is /api (unversioned for the MVP, ready for /api/v1 later).
+// La ruta base es /api (sin versión para el MVP, preparada para usar
+// /api/v1 en el futuro).
 app.use('/api', apiRoutes);
 
 /* ------------------------------------------------------------------ */
-/* SPA static hosting                                                  */
+/* Alojamiento estático de la SPA                                      */
 /* ------------------------------------------------------------------ */
 
-// The Vanilla JS SPA is served by this same Express server in the MVP.
-// Every non-API GET request falls through to index.html so the
-// client-side router (History API) can resolve the route.
+// La SPA en Vanilla JS es servida por este mismo servidor Express en el MVP.
+// Toda solicitud GET que no sea de la API continúa hacia index.html para
+// que el router del cliente (History API) pueda resolver la ruta.
 const frontendDir = path.resolve(__dirname, '../../frontend');
 app.use(express.static(frontendDir));
 
@@ -66,9 +72,8 @@ app.get(/^\/(?!api).*/, (req, res) => {
 });
 
 /* ------------------------------------------------------------------ */
-/* Error handling (must be registered last)                            */
+/* Manejo de errores (debe registrarse al final)                       */
 /* ------------------------------------------------------------------ */
-
 app.use(notFoundHandler);
 app.use(errorHandler);
 
