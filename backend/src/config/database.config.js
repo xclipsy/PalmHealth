@@ -1,24 +1,23 @@
 /**
- * PostgreSQL connection pool configuration (placeholder).
+ * Pool de conexiones a PostgreSQL.
  *
- * Module 3 (Database) will flesh out pool sizing and health checks.
- * All repositories must obtain their client from this module — no
- * repository ever creates its own connection.
- *
- * ORM-free by specification: raw SQL through the `pg` driver only.
+ * Centraliza las conexiones para todos los repositorios.
+ * Utiliza SQL nativo mediante `pg` (sin ORM).
  */
 
 const { Pool } = require('pg');
 const { env } = require('./env.config');
 
 /**
- * Lazily created singleton pool. Created on first query so the server
- * can boot (and serve the SPA) even before the database is configured.
+ * Pool de conexiones singleton, creado bajo demanda.
+ *
+ * Se inicializa en la primera consulta para permitir que el servidor
+ * inicie incluso si la base de datos aún no está configurada.
  */
 let pool = null;
 
 /**
- * Returns the shared connection pool, creating it on first use.
+ * Obtiene el pool de conexiones compartido.
  * @returns {import('pg').Pool}
  */
 const getPool = () => {
@@ -29,7 +28,7 @@ const getPool = () => {
       database: env.db.name,
       user: env.db.user,
       password: env.db.password,
-      // Local PostgreSQL installation — no TLS required.
+     // Instalación local de PostgreSQL: no requiere TLS.
       ssl: false,
     });
   }
@@ -37,25 +36,27 @@ const getPool = () => {
 };
 
 /**
- * Executes a parameterized SQL query against the pool.
- * Always use parameter placeholders ($1, $2, ...) — never interpolate
- * values into SQL strings (SQL injection prevention).
+ * Ejecuta consultas SQL parametrizadas usando el pool.
  *
- * @param {string} text - SQL text with $n placeholders.
- * @param {Array<*>} [params] - Query parameters.
+ * Usa siempre placeholders ($1, $2, ...) para evitar inyección SQL.
+ *
+ * @param {string} text - Consulta SQL con parámetros.
+ * @param {Array<*>} [params] - Valores de la consulta.
  * @returns {Promise<import('pg').QueryResult>}
+ */
  */
 const query = (text, params) => getPool().query(text, params);
 
 /**
- * Runs a callback inside a database transaction. Commits on success,
- * rolls back on any error, and always releases the client. Used by
- * flows that must be atomic (e.g. registration inserts into users
- * plus a role profile table).
+ * Ejecuta una operación dentro de una transacción.
+ *
+ * Confirma los cambios si es exitosa, revierte errores y libera
+ * siempre la conexión. Usado para procesos atómicos.
  *
  * @template T
  * @param {(client: import('pg').PoolClient) => Promise<T>} callback
- * @returns {Promise<T>} The callback's resolved value.
+ * @returns {Promise<T>} Resultado de la operación.
+ */
  */
 const withTransaction = async (callback) => {
   const client = await getPool().connect();
@@ -73,8 +74,8 @@ const withTransaction = async (callback) => {
 };
 
 /**
- * Lightweight connectivity probe used by the health endpoint.
- * @returns {Promise<boolean>} true when the database answers.
+ * Verifica la conexión con la base de datos para el endpoint de salud.
+ * @returns {Promise<boolean>} true si la base de datos responde.
  */
 const isDatabaseHealthy = async () => {
   try {
@@ -86,8 +87,8 @@ const isDatabaseHealthy = async () => {
 };
 
 /**
- * Closes the pool during graceful shutdown so no connection leaks.
- * Safe to call when the pool was never created.
+ * Cierra el pool durante el apagado controlado.
+ * Evita fugas de conexiones y funciona aunque no se haya creado.
  * @returns {Promise<void>}
  */
 const closePool = async () => {
