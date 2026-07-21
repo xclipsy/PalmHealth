@@ -1,17 +1,15 @@
 /**
- * Authentication controller (Part 3 of the specification).
+ * Controlador de autenticación (Parte 3).
  *
- * Thin HTTP layer: extracts validated input, delegates to
- * auth.service and shapes the standardized response. No business
- * logic, no SQL, no direct error formatting.
+ * Capa HTTP ligera: recibe datos validados, delega en auth.service
+ * y genera respuestas estandarizadas. Sin lógica de negocio ni SQL.
  */
-
 const authService = require('../services/auth.service');
 const { sendSuccess } = require('../utils/response.util');
 const { asyncHandler } = require('../utils/async-handler.util');
 const { HTTP_STATUS } = require('../constants/http-status.constants');
 
-/** POST /api/auth/register/patient */
+// POST /api/auth/register/patient
 const registerPatient = asyncHandler(async (req, res) => {
   const result = await authService.registerPatient(req.body);
   sendSuccess(res, {
@@ -21,7 +19,7 @@ const registerPatient = asyncHandler(async (req, res) => {
   });
 });
 
-/** POST /api/auth/register/professional */
+// POST /api/auth/register/professional
 const registerProfessional = asyncHandler(async (req, res) => {
   const result = await authService.registerProfessional(req.body);
   sendSuccess(res, {
@@ -31,7 +29,7 @@ const registerProfessional = asyncHandler(async (req, res) => {
   });
 });
 
-/** POST /api/auth/login */
+// POST /api/auth/login
 const login = asyncHandler(async (req, res) => {
   const result = await authService.login(req.body.email, req.body.password);
   sendSuccess(res, {
@@ -42,9 +40,9 @@ const login = asyncHandler(async (req, res) => {
 
 /**
  * POST /api/auth/logout
- * JWT is stateless — the server holds no session. This endpoint exists
- * so the frontend has a consistent hook: it discards the stored token
- * client-side after calling it.
+ *
+ * JWT es sin estado: el servidor no guarda sesiones.
+ * El frontend elimina el token almacenado al llamar este endpoint.
  */
 const logout = asyncHandler(async (req, res) => {
   sendSuccess(res, {
@@ -55,9 +53,9 @@ const logout = asyncHandler(async (req, res) => {
 
 /**
  * POST /api/auth/forgot-password
- * MVP: simulated flow (no real email delivery). Always responds with
- * the same message whether or not the email exists — prevents user
- * enumeration.
+ *
+ * Flujo simulado del MVP (sin envío real de correos).
+ * Usa la misma respuesta para evitar revelar si el email existe.
  */
 const forgotPassword = asyncHandler(async (req, res) => {
   sendSuccess(res, {
@@ -67,7 +65,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
   });
 });
 
-/** GET /api/auth/profile — requires authentication. */
+// GET /api/auth/profile — requiere autenticación.
 const getProfile = asyncHandler(async (req, res) => {
   const user = await authService.getProfile(req.user.id);
   sendSuccess(res, {
