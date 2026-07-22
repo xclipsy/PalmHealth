@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es" class="bg-background">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Palm Health — Plataforma de salud digital para el seguimiento clínico remoto entre pacientes y profesionales de la salud." />
+  <meta name="theme-color" content="#7fc8b4" />
+  <title>Palm Health — Tu salud, siempre al alcance de tu mano</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/src/assets/images/logo.png" />
+
+  <!-- Typography: Poppins (headings + body, two weights ranges) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Compiled Tailwind CSS (built from src/css/input.css) -->
+  <link rel="stylesheet" href="/src/css/styles.css" />
+</head>
+<body class="bg-background font-sans text-foreground antialiased">
+  <!-- SPA mount point: the router renders every view inside this node -->
+  <div id="app">
+    <!-- Minimal boot placeholder shown before JavaScript loads -->
+    <div class="flex min-h-screen items-center justify-center">
+      <p class="text-muted">Cargando Palm Health…</p>
+    </div>
+  </div>
+
+  <!-- SPA entry point -->
+  <script type="module" src="/src/js/main.js"></script>
+</body>
+</html>
