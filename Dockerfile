@@ -16,7 +16,7 @@ RUN npm install -g pnpm && pnpm install --frozen-lockfile
 # Copia el código fuente (respetando .dockerignore)
 COPY . .
 
-RUN chmod +x scripts/*.sh
+RUN sed -i 's/\r$//' scripts/*.sh && chmod +x scripts/*.sh
 
 EXPOSE 3000
 
